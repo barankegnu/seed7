@@ -589,6 +589,13 @@ objectType dcl_in1 (listType arguments)
         case PARAM_REF:
           INIT_CATEGORY_OF_OBJ(created_object, REFPARAMOBJECT);
           break;
+        default:
+          /* This default is only executed if in_param_type has */
+          /* an illegal enum value. Since only legal values of  */
+          /* parameterType are assigned to in_param_type this   */
+          /* will never happen. The code below has been added   */
+          /* to make source code analyzers happy.               */
+          return raise_with_arguments(SYS_MEM_EXCEPTION, arguments);
       } /* switch */
     } /* if */
     logFunction(printf("dcl_in1 --> ");
@@ -636,6 +643,14 @@ objectType dcl_in2 (listType arguments)
             case PARAM_REF:
               INIT_CATEGORY_OF_OBJ(created_object, REFPARAMOBJECT);
               break;
+            default:
+              /* This default is only executed if in_param_type has */
+              /* an illegal enum value. Since only legal values of  */
+              /* parameterType are assigned to in_param_type this   */
+              /* will never happen. The code below has been added   */
+              /* to make source code analyzers happy.               */
+              return raise_with_obj_and_args(SYS_MEM_EXCEPTION,
+                                             decl_exec_object, arguments);
           } /* switch */
         } /* if */
         shrink_stack();
