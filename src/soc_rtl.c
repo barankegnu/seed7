@@ -417,7 +417,6 @@ static striType receive_and_alloc_stri (socketType inSocket, memSizeType chars_m
                           "malloc(" FMT_U_MEM ") failed.\n",
                           inSocket, chars_missing, sizeof(struct bufferStruct)););
           *err_info = MEMORY_ERROR;
-          result = NULL;
           /* Leave the while loop by setting bytes_in_buffer to zero. */
           bytes_in_buffer = 0;
         } else {
@@ -445,7 +444,9 @@ static striType receive_and_alloc_stri (socketType inSocket, memSizeType chars_m
       } /* if */
       result_size += bytes_in_buffer;
     } /* if */
-    if (likely(*err_info == OKAY_NO_ERROR)) {
+    if (unlikely(*err_info != OKAY_NO_ERROR)) {
+      result = NULL;
+    } else {
       if (unlikely(!ALLOC_STRI_SIZE_OK(result, result_size))) {
         logError(printf("receive_and_alloc_stri(%d, " FMT_U_MEM ", *): "
                         "ALLOC_STRI_SIZE_OK(*, " FMT_U_MEM ") failed.\n",
