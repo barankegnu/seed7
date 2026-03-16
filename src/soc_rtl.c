@@ -1808,7 +1808,7 @@ striType socLineRead (socketType inSocket, charType *const terminationChar)
             /* printf("D result=%08lx, resized_result=%08lx\n",
                 (unsigned long) result, (unsigned long) resized_result); */
             if (unlikely(resized_result == NULL)) {
-              FREE_STRI2(result, result_size);
+              FREE_STRI2(result, old_result_size);
               raise_error(MEMORY_ERROR);
               result = NULL;
             } else {
