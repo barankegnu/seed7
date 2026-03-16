@@ -180,7 +180,11 @@ static os_striType *CommandLineToArgvW (const_os_striType commandLine, int *w_ar
   /* CommandLineToArgvW */
     command_line_size = os_stri_strlen(commandLine);
     argumentCount = 0;
-    w_argv = (os_striType *) malloc(command_line_size * sizeof(os_striType *));
+    /* One extra slot is needed for the trailing NULL element at */
+    /* w_argv[w_argc]. Without it, a one-character commandLine   */
+    /* would overflow w_argv[1]. Likewise an empty commandLine   */
+    /* would overflow w_argv[0].                                 */
+    w_argv = (os_striType *) malloc((command_line_size + 1) * sizeof(os_striType *));
     if (w_argv != NULL) {
       sourcePos = commandLine;
       while (*sourcePos == ' ') {
