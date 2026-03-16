@@ -156,7 +156,11 @@ static os_striType *genArgVector (const const_striType command,
 
   /* genArgVector */
     arraySize = arraySize(parameters);
-    argv = (os_striType *) malloc(sizeof(os_striType) * (arraySize + 2));
+    if (unlikely(arraySize > MAX_MEMSIZETYPE / sizeof(os_striType) - 2)) {
+      argv = NULL;
+    } else {
+      argv = (os_striType *) malloc(sizeof(os_striType) * (arraySize + 2));
+    } /* if */
     if (unlikely(argv == NULL)) {
       *err_info = MEMORY_ERROR;
     } else {
