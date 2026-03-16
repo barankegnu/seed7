@@ -1429,6 +1429,15 @@ objectType prc_raise (listType arguments)
 
 
 
+/**
+ *  Repeat statement/arg_2 until condition/arg_4 is FALSE.
+ *  The statement/arg_2 is executed at least once.
+ *  It is not necessary to initialize the variable 'cond'.
+ *  As long as fail_flag is 0 the computation continues until
+ *  'cond' gets a value. As soon as fail_flag is not 0 the
+ *  condition while (!fail_flag && cond) will not evaluate
+ *  'cond' because !fail_flag is already FALSE.
+ */
 objectType prc_repeat (listType arguments)
 
   {
@@ -1460,6 +1469,15 @@ objectType prc_repeat (listType arguments)
 
 
 
+/**
+ *  Repeat evaluating condition/arg_3 until it results in FALSE.
+ *  The condition/arg_3 is evaluate at least once.
+ *  It is not necessary to initialize the variable 'cond'.
+ *  As long as fail_flag is 0 the computation continues until
+ *  'cond' gets a value. As soon as fail_flag is not 0 the
+ *  condition while (!fail_flag && cond) will not evaluate
+ *  'cond' because !fail_flag is already FALSE.
+ */
 objectType prc_repeat_noop (listType arguments)
 
   {
@@ -2023,6 +2041,10 @@ objectType prc_trace (listType arguments)
 
 
 
+/**
+ *  While condition/arg_2 is TRUE execute statement/arg_4 again and again.
+ *  The condition/arg_2 is evaluate at least once.
+ */
 objectType prc_while (listType arguments)
 
   {
@@ -2064,6 +2086,15 @@ objectType prc_while (listType arguments)
 
 
 
+/**
+ *  As long as condition/arg_2 is TRUE it is evaluated again and again.
+ *  The condition/arg_2 is evaluate at least once.
+ *  It is not necessary to initialize the variable 'cond'.
+ *  As long as fail_flag is 0 the computation continues until
+ *  'cond' gets a value. As soon as fail_flag is not 0 the
+ *  condition while (!fail_flag && cond) will not evaluate
+ *  'cond' because !fail_flag is already FALSE.
+ */
 objectType prc_while_noop (listType arguments)
 
   {
