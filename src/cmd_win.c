@@ -174,16 +174,18 @@ static os_striType *CommandLineToArgvW (const_os_striType commandLine, int *w_ar
     const_os_striType sourcePos;
     os_striType destPos;
     os_striType destBuffer;
-    memSizeType argumentCount;
+    memSizeType argumentCount = 0;
     os_striType *w_argv;
 
   /* CommandLineToArgvW */
     command_line_size = os_stri_strlen(commandLine);
-    argumentCount = 0;
     /* One extra slot is needed for the trailing NULL element at */
     /* w_argv[w_argc]. Without it, a one-character commandLine   */
     /* would overflow w_argv[1]. Likewise an empty commandLine   */
-    /* would overflow w_argv[0].                                 */
+    /* would overflow w_argv[0]. The size of w_argv is large     */
+    /* enough for the maximum possible number of arguments.      */
+    /* Checking argumentCount <= command_line_size before an     */
+    /* assignment to w_argv[argumentCount] is not necessary.     */
     w_argv = (os_striType *) malloc((command_line_size + 1) * sizeof(os_striType *));
     if (w_argv != NULL) {
       sourcePos = commandLine;
@@ -223,7 +225,9 @@ static os_striType *CommandLineToArgvW (const_os_striType commandLine, int *w_ar
               /* Terminate the current argument */
               *destPos = 0;
               destPos++;
-              /* Set pointer to first char of next argument */
+              /* Set pointer to first char of next argument.   */
+              /* No index check of argumentCount is necessary: */
+              /* argumentCount <= command_line_size holds.     */
               w_argv[argumentCount] = destPos;
               argumentCount++;
             } /* if */
@@ -267,7 +271,9 @@ static os_striType *CommandLineToArgvW (const_os_striType commandLine, int *w_ar
                 /* Terminate the current argument */
                 *destPos = 0;
                 destPos++;
-                /* Set pointer to first char of next argument */
+                /* Set pointer to first char of next argument.   */
+                /* No index check of argumentCount is necessary: */
+                /* argumentCount <= command_line_size holds.     */
                 w_argv[argumentCount] = destPos;
                 argumentCount++;
               } /* if */
