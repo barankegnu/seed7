@@ -206,38 +206,50 @@ static consoleType create_console (unsigned int height, unsigned int width)
 
   {
     unsigned int line;
+    memSizeType cell_count;
     consoleType new_con;
 
   /* create_console */
     log2Function(fprintf(stderr, "create_console(%u, %u)\n", height, width););
-    new_con = (consoleType) malloc(sizeof(consoleRecord));
-    if (new_con != NULL) {
-      new_con->char_data = (strElemType *)
-          malloc((size_t) (height * width) * sizeof(strElemType));
-      new_con->chars = (strElemType **) malloc ((size_t) height * sizeof(strElemType *));
-      new_con->attrib_data = (unsigned char *)
-          malloc((size_t) (height * width) * sizeof(unsigned char));
-      new_con->attributes = (unsigned char **)
-          malloc ((size_t) height * sizeof(unsigned char *));
-      new_con->space = (strElemType *) malloc((size_t) width * sizeof(strElemType));
-      if (new_con->char_data != NULL && new_con->chars != NULL &&
-          new_con->attrib_data != NULL && new_con->attributes != NULL &&
-          new_con->space != NULL) {
-        for (line = 0; line < height; line++) {
-          new_con->chars[line] = &new_con->char_data[line * width];
-          new_con->attributes[line] = &new_con->attrib_data[line * width];
-        } /* for */
-        memset_to_strelem(new_con->char_data, ' ', (memSizeType) (height * width));
-        memset(new_con->attrib_data, ' ', (unsigned int) (height * width));
-        memset_to_strelem(new_con->space, ' ', (memSizeType) width);
-        new_con->line_capacity = height;
-        new_con->column_capacity = width;
-        new_con->height = height;
-        new_con->width = width;
-        new_con->size_changed = FALSE;
-      } else {
-        free_console(new_con);
-        new_con = NULL;
+    if (height == 0 || width == 0 ||
+        height > MAX_MEMSIZETYPE / sizeof(strElemType) / width ||
+        height > MAX_MEMSIZETYPE / sizeof(strElemType *) ||
+        height > MAX_MEMSIZETYPE / sizeof(unsigned char *) ||
+        width > MAX_MEMSIZETYPE / sizeof(strElemType)) {
+      new_con = NULL;
+    } else {
+      new_con = (consoleType) malloc(sizeof(consoleRecord));
+      if (new_con != NULL) {
+        cell_count = (memSizeType) height * (memSizeType) width;
+        new_con->char_data = (strElemType *)
+            malloc(cell_count * sizeof(strElemType));
+        new_con->chars = (strElemType **)
+            malloc((memSizeType) height * sizeof(strElemType *));
+        new_con->attrib_data = (unsigned char *)
+            malloc(cell_count * sizeof(unsigned char));
+        new_con->attributes = (unsigned char **)
+            malloc((memSizeType) height * sizeof(unsigned char *));
+        new_con->space = (strElemType *)
+            malloc((memSizeType) width * sizeof(strElemType));
+        if (new_con->char_data != NULL && new_con->chars != NULL &&
+            new_con->attrib_data != NULL && new_con->attributes != NULL &&
+            new_con->space != NULL) {
+          for (line = 0; line < height; line++) {
+            new_con->chars[line] = &new_con->char_data[line * width];
+            new_con->attributes[line] = &new_con->attrib_data[line * width];
+          } /* for */
+          memset_to_strelem(new_con->char_data, ' ', cell_count);
+          memset(new_con->attrib_data, ' ', cell_count);
+          memset_to_strelem(new_con->space, ' ', (memSizeType) width);
+          new_con->line_capacity = height;
+          new_con->column_capacity = width;
+          new_con->height = height;
+          new_con->width = width;
+          new_con->size_changed = FALSE;
+        } else {
+          free_console(new_con);
+          new_con = NULL;
+        } /* if */
       } /* if */
     } /* if */
     log2Function(fprintf(stderr, "create_console --> " FMT_U_MEM "\n",
