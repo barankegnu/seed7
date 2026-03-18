@@ -116,6 +116,10 @@ const proc: check_clib_file is func
       writeln(" ***** Default value of clib_file is not CLIB_NULL_FILE.");
       okay := FALSE;
     end if;
+    if _GENERATE_EMPTY_CLIB_FILE <> CLIB_NULL_FILE then
+      writeln(" ***** _GENERATE_EMPTY_CLIB_FILE does not return CLIB_NULL_FILE.");
+      okay := FALSE;
+    end if;
     if not raisesFileError(close(CLIB_NULL_FILE)) then
       writeln(" ***** Closing CLIB_NULL_FILE does not raise FILE_ERROR.");
       okay := FALSE;
