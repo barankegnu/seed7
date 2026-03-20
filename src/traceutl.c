@@ -1429,7 +1429,7 @@ static void list_node_names (const_nodeType anynode, char *buffer)
         } /* if */
         stri3 = obj_ptr(anynode->match_obj);
         if (buf_len + strlen(stri1) + strlen(stri2) +
-	    strlen(stri3) <= NODE_NAME_LEN_MAX) {
+            strlen(stri3) <= NODE_NAME_LEN_MAX) {
           strcat(buffer, stri1);
           strcat(buffer, stri2);
           strcat(buffer, stri3);
