@@ -904,14 +904,14 @@ void appendListLimited (striType *const msg, const_listType list,
     if (list != NULL &&
         list->obj != NULL &&
         LEGAL_CATEGORY_FIELD(list->obj) &&
-	(CATEGORY_OF_OBJ(list->obj) != SYMBOLOBJECT ||
-	 (HAS_ENTITY(list->obj) &&
+        (CATEGORY_OF_OBJ(list->obj) != SYMBOLOBJECT ||
+         (HAS_ENTITY(list->obj) &&
           GET_ENTITY(list->obj)->ident != NULL &&
           GET_ENTITY(list->obj)->ident->prefix_priority == 0)) &&
         list_end != NULL &&
         list_end->obj != NULL &&
         LEGAL_CATEGORY_FIELD(list_end->obj) &&
-	CATEGORY_OF_OBJ(list_end->obj) == SYMBOLOBJECT &&
+        CATEGORY_OF_OBJ(list_end->obj) == SYMBOLOBJECT &&
         HAS_ENTITY(list_end->obj) &&
         GET_ENTITY(list_end->obj)->ident != NULL &&
         GET_ENTITY(list_end->obj)->ident->infix_priority == 0) {

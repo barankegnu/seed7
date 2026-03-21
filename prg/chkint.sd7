@@ -33388,7 +33388,7 @@ const func boolean: check_lShift_assign_1 is func
       okay := FALSE;
     end if;
 
-	ok := TRUE;
+    ok := TRUE;
     num := -9223372036854775807; num <<:= intExpr( 0); ok &:= num = -9223372036854775807;
     num := -4611686018427387903; num <<:= intExpr( 1); ok &:= num = -9223372036854775806;
     num := -2305843009213693951; num <<:= intExpr( 2); ok &:= num = -9223372036854775804;
@@ -33593,7 +33593,7 @@ const func boolean: check_lShift_assign_4 is func
       okay := FALSE;
     end if;
 
-	ok := TRUE;
+    ok := TRUE;
     num :=            INT64_MIN; num <<:= intExpr( 0); ok &:= num =            INT64_MIN;
     num := -4611686018427387904; num <<:= intExpr( 1); ok &:= num =            INT64_MIN;
     num := -2305843009213693952; num <<:= intExpr( 2); ok &:= num =            INT64_MIN;
