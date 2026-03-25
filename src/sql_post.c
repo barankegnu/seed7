@@ -489,7 +489,7 @@ static errInfoType doExecSql (PGconn *connection, const char *query,
  *  Determine if a SQL statement needs an implicit commit.
  *  In PostgreSQL DDL statements like CREATE need a commit.
  *  In other databases CREATE and other DDL statements are executed
- *  without a need to be commited. The implicitCommit mechanism tries
+ *  without a need to be committed. The implicitCommit mechanism tries
  *  to adjust the PostgreSQL behavior to what other databases do.
  *  Instead of using a list of DDL statements it uses a list of
  *  DML and TCS statements which need an explicit commit.
