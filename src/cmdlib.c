@@ -1346,7 +1346,7 @@ objectType cmd_set_search_path (listType arguments)
       return raise_exception(SYS_MEM_EXCEPTION);
     } else {
       cmdSetSearchPath(searchPath);
-      FREE_RTL_ARRAY(searchPath, ARRAY_LENGTH(searchPath));
+      FREE_RTL_ARRAY(searchPath, arraySize(searchPath));
     } /* if */
     return SYS_EMPTY_OBJECT;
   } /* cmd_set_search_path */
