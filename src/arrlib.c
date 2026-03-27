@@ -217,7 +217,6 @@ objectType arr_append (listType arguments)
     objectType array_exec_object;
 
   /* arr_append */
-    logFunction(printf("arr_append\n"););
     arr_variable = arg_1(arguments);
     isit_array(arr_variable);
     is_variable(arr_variable);
