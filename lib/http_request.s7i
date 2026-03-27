@@ -343,6 +343,7 @@ const func httpHeader: getHttpHeader (inout file: sock) is func
     var integer: colonPos is 0;
     var string: fieldName is "";
     var string: contentLengthStri is "";
+    var string: decimalDigits is "";
     var string: cookieName is "";
     var string: cookieValue is "";
   begin
@@ -362,12 +363,12 @@ const func httpHeader: getHttpHeader (inout file: sock) is func
             header.contentEncoding := lower(trim(line[succ(colonPos) ..]));
           when {"content-length"}:
             contentLengthStri := trim(line[succ(colonPos) ..]);
-            block
-              header.contentLength := integer(contentLengthStri);
-            exception
-              catch RANGE_ERROR:
-                header.contentLength := -1;
-            end block;
+            decimalDigits := getDigits(contentLengthStri);
+            if decimalDigits <> "" and contentLengthStri = "" then
+              header.contentLength := integer(decimalDigits);
+            else
+              header.contentLength := -1;
+            end if;
           when {"location"}:
             header.location := trim(line[succ(colonPos) ..]);
           when {"set-cookie"}:
@@ -392,6 +393,7 @@ const func string: getHttpBody (inout file: sock, in httpHeader: header) is func
     var string: data is "";
   local
     var string: line is "";
+    var string: hexDigits is "";
     var integer: chunkSize is 0;
     var integer: contentLength is 0;
     var string: buffer is "";
@@ -399,12 +401,12 @@ const func string: getHttpBody (inout file: sock, in httpHeader: header) is func
     if header.transferEncoding = "chunked" then
       if not eof(sock) then
         line := getln(sock);
-        block
-          chunkSize := integer(line, 16);
-        exception
-          catch RANGE_ERROR:
-            chunkSize := -1;
-        end block;
+        hexDigits := getHexDigits(line);
+        if hexDigits <> "" and line = "" then
+          chunkSize := integer(hexDigits, 16);
+        else
+          chunkSize := -1;
+        end if;
         while chunkSize > 0 and not eof(sock) do
           repeat
             buffer := gets(sock, chunkSize);
@@ -414,12 +416,12 @@ const func string: getHttpBody (inout file: sock, in httpHeader: header) is func
           if not eof(sock) then
             ignore(getln(sock));
             line := getln(sock);
-            block
-              chunkSize := integer(line, 16);
-            exception
-              catch RANGE_ERROR:
-                chunkSize := -1;
-            end block;
+            hexDigits := getHexDigits(line);
+            if hexDigits <> "" and line = "" then
+              chunkSize := integer(hexDigits, 16);
+            else
+              chunkSize := -1;
+            end if;
           end if;
         end while;
       end if;
