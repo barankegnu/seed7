@@ -132,11 +132,10 @@ intType aceOrd (const_actEntryType actEntry)
 
 
 /**
- *  Convert an action to a string.
- *  If the action is not found in the table of legal actions
- *  the string "ACT_ILLEGAL" is returned.
- *  @param actEntry Action which is converted to a string..
- *  @return the string result of the conversion.
+ *  Get the name of an action entry.
+ *  @param actEntry Action entry from which the name is retrieved.
+ *  @return the name of the action entry.
+ *  @exception RANGE_ERROR The action entry is NULL.
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  */
 striType aceStr (const_actEntryType actEntry)

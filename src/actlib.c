@@ -253,11 +253,10 @@ objectType ace_ord (listType arguments)
 
 
 /**
- *  Convert an action to a string.
- *  If the action is not found in the table of legal actions
- *  the string "ACT_ILLEGAL" is returned.
- *  @param anAction/arg_1 Action which is converted to a string..
- *  @return the string result of the conversion.
+ *  Get the name of an action entry.
+ *  @param actEntry/arg_1 Action entry from which the name is retrieved.
+ *  @return the name of the action entry.
+ *  @exception RANGE_ERROR The action entry is NULL.
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  */
 objectType ace_str (listType arguments)
@@ -288,7 +287,7 @@ objectType ace_str (listType arguments)
  *  Get 'ACTION' value of the object referenced by 'aReference/arg_1'.
  *  @return the 'ACTION' value of the referenced object.
  *  @exception RANGE_ERROR If 'aReference/arg_1' is NIL or
- *             category(aReference) <> ACTOBJECT holds.
+ *             the category is neither ACTENTRYOBJECT nor ACTOBJECT.
  */
 objectType ace_value (listType arguments)
 
@@ -308,7 +307,7 @@ objectType ace_value (listType arguments)
     } else {
       logError(printf("ace_value(");
                trace1(obj_arg);
-               printf("): Category is not ACTOBJECT.\n"););
+               printf("): Category neither ACTENTRYOBJECT nor ACTOBJECT.\n"););
       return raise_exception(SYS_RNG_EXCEPTION);
     } /* if */
   } /* ace_value */
