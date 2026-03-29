@@ -1,0 +1,52 @@
+/********************************************************************/
+/*                                                                  */
+/*  stackutl.h    Functions for stack, sigaltstack and catch_stack. */
+/*  Copyright (C) 1989 - 2011, 2014, 2023, 2026  Thomas Mertes      */
+/*                                                                  */
+/*  This file is part of the Seed7 Runtime Library.                 */
+/*                                                                  */
+/*  The Seed7 Runtime Library is free software; you can             */
+/*  redistribute it and/or modify it under the terms of the GNU     */
+/*  Lesser General Public License as published by the Free Software */
+/*  Foundation; either version 2.1 of the License, or (at your      */
+/*  option) any later version.                                      */
+/*                                                                  */
+/*  The Seed7 Runtime Library is distributed in the hope that it    */
+/*  will be useful, but WITHOUT ANY WARRANTY; without even the      */
+/*  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR */
+/*  PURPOSE.  See the GNU Lesser General Public License for more    */
+/*  details.                                                        */
+/*                                                                  */
+/*  You should have received a copy of the GNU Lesser General       */
+/*  Public License along with this program; if not, write to the    */
+/*  Free Software Foundation, Inc., 51 Franklin Street,             */
+/*  Fifth Floor, Boston, MA  02110-1301, USA.                       */
+/*                                                                  */
+/*  Module: Seed7 Runtime Library                                   */
+/*  File: seed7/src/stackutl.h                                      */
+/*  Changes: 2014, 2023, 2026  Thomas Mertes                        */
+/*  Content: Functions for stack, sigaltstack and catch_stack.      */
+/*                                                                  */
+/********************************************************************/
+
+#define CATCH_STACK_INCREMENT 128
+typedef longjmpPosition catch_type;
+
+#ifdef DO_INIT
+catch_type *catch_stack = NULL;
+size_t catch_stack_pos = 0;
+size_t max_catch_stack = 0;
+#else
+extern catch_type *catch_stack;
+extern size_t catch_stack_pos;
+extern size_t max_catch_stack;
+#endif
+
+
+void setupStack (memSizeType stackSize);
+boolType resizeCatchStackOkay (void);
+void resize_catch_stack (void);
+#if CHECK_STACK
+boolType checkStack (boolType inLogMacro);
+memSizeType getMaxStackSize (void);
+#endif

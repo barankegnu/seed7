@@ -42,6 +42,7 @@
 #include "data_rtl.h"
 #include "os_decls.h"
 #include "infile.h"
+#include "stackutl.h"
 #include "heaputl.h"
 #include "flistutl.h"
 #include "actutl.h"
@@ -79,10 +80,6 @@ typedef HINSTANCE__ *HINSTANCE;
 #endif
 
 #define VERSION_INFO "SEED7 INTERPRETER Version 5.4.%d  Copyright (c) 1990-2025 Thomas Mertes\n"
-
-typedef longjmpPosition catch_type;
-extern catch_type *catch_stack;
-extern size_t catch_stack_pos;
 
 
 

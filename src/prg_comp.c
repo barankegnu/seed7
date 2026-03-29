@@ -41,6 +41,7 @@
 #include "sigutl.h"
 #include "data.h"
 #include "data_rtl.h"
+#include "stackutl.h"
 #include "heaputl.h"
 #include "flistutl.h"
 #include "striutl.h"
@@ -70,11 +71,6 @@
 #define EXTERN
 #include "prg_comp.h"
 
-
-typedef longjmpPosition catch_type;
-extern catch_type *catch_stack;
-extern size_t catch_stack_pos;
-extern size_t max_catch_stack;
 
 extern boolType interpreter_exception;
 

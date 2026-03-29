@@ -43,6 +43,7 @@
 #include "data.h"
 #include "data_rtl.h"
 #include "os_decls.h"
+#include "stackutl.h"
 #include "heaputl.h"
 #include "flistutl.h"
 #include "striutl.h"
@@ -74,10 +75,6 @@
 #include "prclib.h"
 
 
-typedef longjmpPosition catch_type;
-extern catch_type *catch_stack;
-extern size_t catch_stack_pos;
-extern size_t max_catch_stack;
 extern objectType last_exception;
 
 

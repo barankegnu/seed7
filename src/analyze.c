@@ -42,6 +42,7 @@
 #include "data.h"
 #include "data_rtl.h"
 #include "os_decls.h"
+#include "stackutl.h"
 #include "heaputl.h"
 #include "striutl.h"
 #include "syvarutl.h"
@@ -87,11 +88,6 @@
 
 #define TRACE_DECL_ANY 0
 
-
-typedef longjmpPosition catch_type;
-extern catch_type *catch_stack;
-extern size_t catch_stack_pos;
-extern size_t max_catch_stack;
 
 /* If the analyzer is used from a compiled program this */
 /* flag decides which exception handler should be called: */
