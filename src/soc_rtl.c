@@ -531,6 +531,12 @@ socketType socAccept (socketType listenerSocket, bstriType *address)
                               (memSizeType) addrlen);
         if (unlikely(resized_address == NULL)) {
           (*address)->size = MAX_ADDRESS_SIZE;
+          /* Avoid leak of file descriptors. */
+#if SOCKET_LIB == UNIX_SOCKETS
+          close(result);
+#elif SOCKET_LIB == WINSOCK_SOCKETS
+          closesocket(result);
+#endif
           raise_error(MEMORY_ERROR);
           result = (os_socketType) -1;
         } else {
