@@ -1486,6 +1486,7 @@ void trace_nodes (void)
   {
     int position;
     int character;
+    identType tableEntry;
     char buffer[NODE_NAME_LEN_MAX + NULL_TERMINATION_LEN];
 
   /* trace_nodes */
@@ -1499,31 +1500,34 @@ void trace_nodes (void)
       if (op_character(character) ||
           char_class(character) == LEFTPARENCHAR ||
           char_class(character) == PARENCHAR) {
-        if (prog->ident.table1[character]->entity != NULL) {
-          if (prog->ident.table1[character]->entity->data.owner != NULL) {
-            prot_cstri8(id_string(prog->ident.table1[character]));
+        tableEntry = prog->ident.table1[character];
+        if (tableEntry != NULL && tableEntry->entity != NULL) {
+          if (tableEntry->entity->data.owner != NULL) {
+            prot_cstri8(id_string(tableEntry));
             prot_cstri(" is ");
-            printobject(prog->ident.table1[character]->entity->data.owner->obj);
+            printobject(tableEntry->entity->data.owner->obj);
             prot_nl();
           } /* if */
         } /* if */
       } /* if */
     } /* for */
-    if (prog->declaration_root->symbol != NULL) {
-      buffer[0] = '\0';
-      list_node_names(prog->declaration_root->symbol, buffer);
-    } /* if */
-    if (prog->declaration_root->inout_param != NULL) {
-      strcpy(buffer, "inout_param ");
-      list_node_names(prog->declaration_root->inout_param, buffer);
-    } /* if */
-    if (prog->declaration_root->other_param != NULL) {
-      strcpy(buffer, "other_param ");
-      list_node_names(prog->declaration_root->other_param, buffer);
-    } /* if */
-    if (prog->declaration_root->attr != NULL) {
-      strcpy(buffer, "attr ");
-      list_node_names(prog->declaration_root->attr, buffer);
+    if (prog->declaration_root != NULL) {
+      if (prog->declaration_root->symbol != NULL) {
+        buffer[0] = '\0';
+        list_node_names(prog->declaration_root->symbol, buffer);
+      } /* if */
+      if (prog->declaration_root->inout_param != NULL) {
+        strcpy(buffer, "inout_param ");
+        list_node_names(prog->declaration_root->inout_param, buffer);
+      } /* if */
+      if (prog->declaration_root->other_param != NULL) {
+        strcpy(buffer, "other_param ");
+        list_node_names(prog->declaration_root->other_param, buffer);
+      } /* if */
+      if (prog->declaration_root->attr != NULL) {
+        strcpy(buffer, "attr ");
+        list_node_names(prog->declaration_root->attr, buffer);
+      } /* if */
     } /* if */
     prot_cstri("----------");
     prot_nl();
