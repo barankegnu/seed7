@@ -1721,17 +1721,27 @@ striType socLineRead (socketType inSocket, charType *const terminationChar)
                                               cast_send_recv_data(buffer),
                                               cast_buffer_len(bytes_requested), 0);
           /* bytes_received should always be identical to bytes_requested. */
-          result_size = bytes_requested - 1;
-          if (nlPos != buffer && nlPos[-1] == '\r') {
-            result_size--;
-          } /* if */
-          if (unlikely(!ALLOC_STRI_CHECK_SIZE(result, result_size))) {
-            raise_error(MEMORY_ERROR);
+          if (unlikely(bytes_received != bytes_requested)) {
+            logError(printf("socLineRead: "
+                            "recv(%d, *, " FMT_U_MEM ") failed:\n"
+                            "%s=%d\nerror: %s\n",
+                            inSocket, bytes_requested,
+                            ERROR_INFORMATION););
+            raise_error(FILE_ERROR);
             result = NULL;
           } else {
-            memcpy_to_strelem(result->mem, buffer, result_size);
-            result->size = result_size;
-            *terminationChar = '\n';
+            result_size = bytes_requested - 1;
+            if (nlPos != buffer && nlPos[-1] == '\r') {
+              result_size--;
+            } /* if */
+            if (unlikely(!ALLOC_STRI_CHECK_SIZE(result, result_size))) {
+              raise_error(MEMORY_ERROR);
+              result = NULL;
+            } else {
+              memcpy_to_strelem(result->mem, buffer, result_size);
+              result->size = result_size;
+              *terminationChar = '\n';
+            } /* if */
           } /* if */
         } else {
           result_size = bytes_received;
@@ -1745,49 +1755,62 @@ striType socLineRead (socketType inSocket, charType *const terminationChar)
                                                 cast_send_recv_data(buffer),
                                                 cast_buffer_len(bytes_requested), 0);
             /* bytes_received should always be identical to bytes_requested. */
-            result_size += BUFFER_DELTA_SIZE;
-            /* printf("A result=%08lx, old_result_size=%d, result_size=%d\n",
-                (unsigned long) result, old_result_size, result_size); */
-            REALLOC_STRI_CHECK_SIZE2(resized_result, result, old_result_size, result_size);
-            /* printf("B result=%08lx, resized_result=%08lx\n",
-                (unsigned long) result, (unsigned long) resized_result); */
-            if (unlikely(resized_result == NULL)) {
+            if (unlikely(bytes_received != bytes_requested)) {
+              logError(printf("socLineRead: "
+                              "recv(%d, *, " FMT_U_MEM ") failed:\n"
+                              "%s=%d\nerror: %s\n",
+                              inSocket, bytes_requested,
+                              ERROR_INFORMATION););
               if (result != NULL) {
                 FREE_STRI2(result, old_result_size);
               } /* if */
-              raise_error(MEMORY_ERROR);
+              raise_error(FILE_ERROR);
               result = NULL;
             } else {
-              result = resized_result;
-              old_result_size = result_size;
-              /* printf("a result[%d], size=%d\n", result_pos, bytes_requested); */
-              memcpy_to_strelem(&result->mem[result_pos], buffer, bytes_requested);
-              result_pos += bytes_requested;
-              bytes_received = (memSizeType) recv((os_socketType) inSocket,
-                                                  cast_send_recv_data(buffer),
-                                                  cast_buffer_len(BUFFER_DELTA_SIZE),
-                                                  MSG_PEEK);
-              if (unlikely(bytes_received == (memSizeType) -1)) {
-                logError(printf("socLineRead: "
-                                "recv(%d, *, " FMT_U_MEM ", MSG_PEEK) failed:\n"
-                                "%s=%d\nerror: %s\n",
-                                inSocket, (memSizeType) BUFFER_DELTA_SIZE,
-                                ERROR_INFORMATION););
-                bytes_received = 0;
-              } /* if */
-              if (bytes_received == 0) {
-                REALLOC_STRI_CHECK_SIZE2(resized_result, result, result_size, result_pos);
-                if (unlikely(resized_result == NULL)) {
-                  FREE_STRI2(result, result_size);
-                  raise_error(MEMORY_ERROR);
-                  result = NULL;
-                } else {
-                  result = resized_result;
-                  result->size = result_pos;
-                  *terminationChar = (charType) EOF;
+              result_size += BUFFER_DELTA_SIZE;
+              /* printf("A result=%08lx, old_result_size=%d, result_size=%d\n",
+                  (unsigned long) result, old_result_size, result_size); */
+              REALLOC_STRI_CHECK_SIZE2(resized_result, result, old_result_size, result_size);
+              /* printf("B result=%08lx, resized_result=%08lx\n",
+                  (unsigned long) result, (unsigned long) resized_result); */
+              if (unlikely(resized_result == NULL)) {
+                if (result != NULL) {
+                  FREE_STRI2(result, old_result_size);
                 } /* if */
+                raise_error(MEMORY_ERROR);
+                result = NULL;
               } else {
-                nlPos = (ucharType *) memchr(buffer, '\n', bytes_received);
+                result = resized_result;
+                old_result_size = result_size;
+                /* printf("a result[%d], size=%d\n", result_pos, bytes_requested); */
+                memcpy_to_strelem(&result->mem[result_pos], buffer, bytes_requested);
+                result_pos += bytes_requested;
+                bytes_received = (memSizeType) recv((os_socketType) inSocket,
+                                                    cast_send_recv_data(buffer),
+                                                    cast_buffer_len(BUFFER_DELTA_SIZE),
+                                                    MSG_PEEK);
+                if (unlikely(bytes_received == (memSizeType) -1)) {
+                  logError(printf("socLineRead: "
+                                  "recv(%d, *, " FMT_U_MEM ", MSG_PEEK) failed:\n"
+                                  "%s=%d\nerror: %s\n",
+                                  inSocket, (memSizeType) BUFFER_DELTA_SIZE,
+                                  ERROR_INFORMATION););
+                  bytes_received = 0;
+                } /* if */
+                if (bytes_received == 0) {
+                  REALLOC_STRI_CHECK_SIZE2(resized_result, result, result_size, result_pos);
+                  if (unlikely(resized_result == NULL)) {
+                    FREE_STRI2(result, result_size);
+                    raise_error(MEMORY_ERROR);
+                    result = NULL;
+                  } else {
+                    result = resized_result;
+                    result->size = result_pos;
+                    *terminationChar = (charType) EOF;
+                  } /* if */
+                } else {
+                  nlPos = (ucharType *) memchr(buffer, '\n', bytes_received);
+                } /* if */
               } /* if */
             } /* if */
           } while (result != NULL && bytes_received != 0 && nlPos == NULL);
@@ -1798,37 +1821,48 @@ striType socLineRead (socketType inSocket, charType *const terminationChar)
                                                 cast_send_recv_data(buffer),
                                                 cast_buffer_len(bytes_requested), 0);
             /* bytes_received should always be identical to bytes_requested. */
-            bytes_requested--;
-            if (nlPos == buffer) {
-              /* The first character of the read buffer is a newline. */
-              /* Note that this place can only be reached after at    */
-              /* least one character has been successfully read.      */
-              /* Because of that result_pos >= 1 holds.               */
-              if (result->mem[result_pos - 1] == '\r') {
-                /* If the last character in result->mem is a carriage */
-                /* return it is removed by decrementing result_pos.   */
-                result_pos--;
-              } /* if */
-            } else if (nlPos[-1] == '\r') {
-              bytes_requested--;
-            } /* if */
-            old_result_size = result_size;
-            result_size = result_pos + bytes_requested;
-            /* printf("C result=%08lx, old_result_size=%d, result_size=%d\n",
-                (unsigned long) result, old_result_size, result_size); */
-            REALLOC_STRI_CHECK_SIZE2(resized_result, result, old_result_size, result_size);
-            /* printf("D result=%08lx, resized_result=%08lx\n",
-                (unsigned long) result, (unsigned long) resized_result); */
-            if (unlikely(resized_result == NULL)) {
+            if (unlikely(bytes_received != bytes_requested)) {
+              logError(printf("socLineRead: "
+                              "recv(%d, *, " FMT_U_MEM ") failed:\n"
+                              "%s=%d\nerror: %s\n",
+                              inSocket, bytes_requested,
+                              ERROR_INFORMATION););
               FREE_STRI2(result, old_result_size);
-              raise_error(MEMORY_ERROR);
+              raise_error(FILE_ERROR);
               result = NULL;
             } else {
-              result = resized_result;
-              /* printf("e result[%d], size=%d\n", result_pos, bytes_requested); */
-              memcpy_to_strelem(&result->mem[result_pos], buffer, bytes_requested);
-              result->size = result_size;
-              *terminationChar = '\n';
+              bytes_requested--;
+              if (nlPos == buffer) {
+                /* The first character of the read buffer is a newline. */
+                /* Note that this place can only be reached after at    */
+                /* least one character has been successfully read.      */
+                /* Because of that result_pos >= 1 holds.               */
+                if (result->mem[result_pos - 1] == '\r') {
+                  /* If the last character in result->mem is a carriage */
+                  /* return it is removed by decrementing result_pos.   */
+                  result_pos--;
+                } /* if */
+              } else if (nlPos[-1] == '\r') {
+                bytes_requested--;
+              } /* if */
+              old_result_size = result_size;
+              result_size = result_pos + bytes_requested;
+              /* printf("C result=%08lx, old_result_size=%d, result_size=%d\n",
+                  (unsigned long) result, old_result_size, result_size); */
+              REALLOC_STRI_CHECK_SIZE2(resized_result, result, old_result_size, result_size);
+              /* printf("D result=%08lx, resized_result=%08lx\n",
+                  (unsigned long) result, (unsigned long) resized_result); */
+              if (unlikely(resized_result == NULL)) {
+                FREE_STRI2(result, old_result_size);
+                raise_error(MEMORY_ERROR);
+                result = NULL;
+              } else {
+                result = resized_result;
+                /* printf("e result[%d], size=%d\n", result_pos, bytes_requested); */
+                memcpy_to_strelem(&result->mem[result_pos], buffer, bytes_requested);
+                result->size = result_size;
+                *terminationChar = '\n';
+              } /* if */
             } /* if */
           } /* if */
         } /* if */
