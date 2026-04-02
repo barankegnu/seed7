@@ -197,14 +197,14 @@ genericType ustriCreateGeneric (const genericType source)
 
 
 
-intType ustriHash (const const_ustriType ustri)
+intType ustriHashCode (const const_ustriType ustri)
 
   {
     memSizeType length;
     intType hashCode;
 
-  /* ustriHash */
-    logFunction(printf("ustriHash(\"%s\")\n",
+  /* ustriHashCode */
+    logFunction(printf("ustriHashCode(\"%s\")\n",
                        ustri == NULL ? (ustriType) "\\ ** NULL_USTRI "
                                      : ustri););
     if (ustri == NULL || ustri[0] == '\0') {
@@ -213,9 +213,9 @@ intType ustriHash (const const_ustriType ustri)
       length = strlen((const_cstriType) ustri);
       hashCode = ustringHashCode(ustri, length);
     } /* if */
-    logFunction(printf("ustriHash --> " FMT_D "\n", hashCode););
+    logFunction(printf("ustriHashCode --> " FMT_D "\n", hashCode););
     return hashCode;
-  } /* ustriHash */
+  } /* ustriHashCode */
 
 
 
