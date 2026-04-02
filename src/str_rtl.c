@@ -1785,7 +1785,7 @@ void strAppendChMult (striType *const destination, const charType ch,
       } /* if */
     } else if (unlikely(stri_dest->size >
                         MAX_STRI_LEN - (memSizeType) factor)) {
-      /* number of bytes does not fit into memSizeType */
+      /* The number of bytes does not fit into memSizeType. */
       raise_error(MEMORY_ERROR);
     } else {
       new_size = stri_dest->size + (memSizeType) factor;
@@ -1841,7 +1841,7 @@ void strAppendZeroMult (striType *const destination, const intType factor)
       raise_error(RANGE_ERROR);
     } else if (unlikely(stri_dest->size >
                         MAX_STRI_LEN - (memSizeType) factor)) {
-      /* number of bytes does not fit into memSizeType */
+      /* The number of bytes does not fit into memSizeType. */
       raise_error(MEMORY_ERROR);
     } else if (factor != 0) {
       new_size = stri_dest->size + (memSizeType) factor;
@@ -1950,6 +1950,8 @@ void strAppendTemp (striType *const restrict destination,
 
 /**
  *  Replace all occurrences of char 'searched' in 'mainStri' by 'replacement'.
+ *  This function is used by the compiler to do a string replace if
+ *  'searched' and 'replacement' are single characters.
  *  @return the result of the replacement.
  */
 striType strChChRepl (const const_striType mainStri,
@@ -2098,6 +2100,8 @@ intType strChPos (const const_striType mainStri, const charType searched)
 
 /**
  *  Replace all occurrences of char 'searched' in 'mainStri' by 'replacement'.
+ *  This function is used by the compiler to do a string replace if
+ *  'searched' is a single character.
  *  @return the result of the replacement.
  */
 striType strChRepl (const const_striType mainStri,
@@ -2126,6 +2130,7 @@ striType strChRepl (const const_striType mainStri,
                       main_size, replacement->size););
     if (replacement->size > 1) {
       if (unlikely(main_size > MAX_STRI_LEN / replacement->size)) {
+        /* The computation of guessed_result_size would overflow. */
         raise_error(MEMORY_ERROR);
         return NULL;
       } else {
@@ -2503,7 +2508,7 @@ striType strConcatCharTemp (striType stri1, const charType aChar)
     /* Incrementing a string size cannot overflow. */
     result_size = stri1->size + 1;
     if (unlikely(result_size > MAX_STRI_LEN)) {
-      /* number of bytes does not fit into memSizeType */
+      /* The number of bytes does not fit into memSizeType. */
       FREE_STRI(stri1);
       raise_error(MEMORY_ERROR);
       stri1 = NULL;
@@ -2613,7 +2618,7 @@ striType strConcatTemp (striType restrict stri1,
                 printf("\"%s\")", striAsUnquotedCStri(stri2));
                 fflush(stdout););
     if (unlikely(stri1->size > MAX_STRI_LEN - stri2->size)) {
-      /* number of bytes does not fit into memSizeType */
+      /* The number of bytes does not fit into memSizeType. */
       FREE_STRI(stri1);
       raise_error(MEMORY_ERROR);
       stri1 = NULL;
@@ -4413,6 +4418,7 @@ striType strRepl (const const_striType mainStri,
                       main_size, searched_size, replacement->size););
     if (searched_size != 0 && replacement->size > searched_size) {
       if (unlikely(main_size / searched_size + 1 > MAX_STRI_LEN / replacement->size)) {
+        /* The computation of guessed_result_size would overflow. */
         raise_error(MEMORY_ERROR);
         return NULL;
       } else {
