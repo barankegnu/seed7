@@ -297,4 +297,4 @@ const proc: seek (in clib_file: aFile, in integer: position)         is action "
 const func integer: tell (in clib_file: aFile)                       is action "FIL_TELL";
 
 
-const func string: literal (in clib_file: aFile)                     is action "FIL_LIT";
+const func string: literal (in clib_file: aFile)                     is action "FIL_LITERAL";

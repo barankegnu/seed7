@@ -848,8 +848,8 @@ const proc: process_action (in reference: function, in ref_list: params,
         process(FIL_INPUT_READY, function, params, c_expr);
       when {"FIL_LINE_READ"}:
         process(FIL_LINE_READ, function, params, c_expr);
-      when {"FIL_LIT"}:
-        process(FIL_LIT, function, params, c_expr);
+      when {"FIL_LITERAL"}:
+        process(FIL_LITERAL, function, params, c_expr);
       when {"FIL_LNG"}:
         process(FIL_LNG, function, params, c_expr);
       when {"FIL_NE"}:

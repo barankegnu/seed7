@@ -439,7 +439,7 @@ static const actEntryRecord actEntryTable[] = {
     { "FIL_IN",                       fil_in,                       },
     { "FIL_INPUT_READY",              fil_input_ready,              },
     { "FIL_LINE_READ",                fil_line_read,                },
-    { "FIL_LIT",                      fil_lit,                      },
+    { "FIL_LITERAL",                  fil_literal,                  },
     { "FIL_LNG",                      fil_lng,                      },
     { "FIL_NE",                       fil_ne,                       },
     { "FIL_OPEN",                     fil_open,                     },

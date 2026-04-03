@@ -453,13 +453,13 @@ objectType fil_line_read (listType arguments)
 
 
 
-objectType fil_lit (listType arguments)
+objectType fil_literal (listType arguments)
 
-  { /* fil_lit */
+  { /* fil_literal */
     isit_file(arg_1(arguments));
     return bld_stri_temp(
-        filLit(take_file(arg_1(arguments))));
-  } /* fil_lit */
+        filLiteral(take_file(arg_1(arguments))));
+  } /* fil_literal */
 
 
 

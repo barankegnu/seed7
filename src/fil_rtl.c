@@ -1767,14 +1767,14 @@ striType filLineReadChkCtrlC (fileType inFile, charType *const terminationChar)
 
 
 
-striType filLit (fileType aFile)
+striType filLiteral (fileType aFile)
 
   {
     cFileType cFile;
     const_cstriType file_name;
     striType result;
 
-  /* filLit */
+  /* filLiteral */
     cFile = aFile->cFile;
     if (cFile == NULL) {
       file_name = "NULL";
@@ -1792,7 +1792,7 @@ striType filLit (fileType aFile)
       raise_error(MEMORY_ERROR);
     } /* if */
     return result;
-  } /* filLit */
+  } /* filLiteral */
 
 
 

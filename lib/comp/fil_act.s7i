@@ -40,7 +40,7 @@ const ACTION: FIL_HAS_NEXT         is action "FIL_HAS_NEXT";
 const ACTION: FIL_IN               is action "FIL_IN";
 const ACTION: FIL_INPUT_READY      is action "FIL_INPUT_READY";
 const ACTION: FIL_LINE_READ        is action "FIL_LINE_READ";
-const ACTION: FIL_LIT              is action "FIL_LIT";
+const ACTION: FIL_LITERAL          is action "FIL_LITERAL";
 const ACTION: FIL_LNG              is action "FIL_LNG";
 const ACTION: FIL_NE               is action "FIL_NE";
 const ACTION: FIL_OPEN             is action "FIL_OPEN";
@@ -83,7 +83,7 @@ const proc: fil_prototypes (inout file: c_prog) is func
     declareExtern(c_prog, "boolType    filInputReady (fileType);");
     declareExtern(c_prog, "striType    filLineRead (fileType, charType *);");
     declareExtern(c_prog, "striType    filLineReadChkCtrlC (fileType, charType *);");
-    declareExtern(c_prog, "striType    filLit (fileType);");
+    declareExtern(c_prog, "striType    filLiteral (fileType);");
     declareExtern(c_prog, "intType     filLng (fileType);");
     declareExtern(c_prog, "fileType    filOpen (const const_striType, const const_striType);");
     declareExtern(c_prog, "fileType    filOpenNullDevice (void);");
@@ -304,12 +304,12 @@ const proc: process (FIL_LINE_READ, in reference: function,
   end func;
 
 
-const proc: process (FIL_LIT, in reference: function,
+const proc: process (FIL_LITERAL, in reference: function,
     in ref_list: params, inout expr_type: c_expr) is func
 
   begin
     prepare_stri_result(c_expr);
-    c_expr.result_expr := "filLit(";
+    c_expr.result_expr := "filLiteral(";
     getStdParamToResultExpr(params[1], c_expr);
     c_expr.result_expr &:= ")";
   end func;

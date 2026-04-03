@@ -68,7 +68,7 @@ boolType filHasNextChkCtrlC (fileType inFile);
 striType filLineRead (fileType inFile, charType *const terminationChar);
 striType filLineReadChkCtrlC (fileType inFile,
     charType *const terminationChar);
-striType filLit (fileType aFile);
+striType filLiteral (fileType aFile);
 intType filLng (fileType aFile);
 fileType filOpen (const const_striType path, const const_striType mode);
 fileType filOpenNullDevice (void);

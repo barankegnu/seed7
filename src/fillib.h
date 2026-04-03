@@ -43,7 +43,7 @@ objectType fil_has_next         (listType arguments);
 objectType fil_in               (listType arguments);
 objectType fil_input_ready      (listType arguments);
 objectType fil_line_read        (listType arguments);
-objectType fil_lit              (listType arguments);
+objectType fil_literal          (listType arguments);
 objectType fil_lng              (listType arguments);
 objectType fil_ne               (listType arguments);
 objectType fil_open             (listType arguments);
