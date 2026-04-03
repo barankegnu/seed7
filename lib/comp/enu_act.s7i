@@ -72,16 +72,6 @@ const proc: process (ENU_EQ, in reference: function,
   end func;
 
 
-const proc: process (ENU_ICONV3_EXCEPT, in reference: function,
-    in ref_list: params, inout expr_type: c_expr) is func
-
-  begin
-    c_expr.expr &:= "(";
-    process_expr(params[3], c_expr);
-    c_expr.expr &:= ")";
-  end func;
-
-
 const proc: process (ENU_ICONV2, in reference: function,
     in ref_list: params, inout expr_type: c_expr) is func
 
@@ -140,6 +130,16 @@ const proc: process (ENU_ICONV2, in reference: function,
       process_expr(params[1], c_expr);
       c_expr.expr &:= ")";
     end if;
+  end func;
+
+
+const proc: process (ENU_ICONV3_EXCEPT, in reference: function,
+    in ref_list: params, inout expr_type: c_expr) is func
+
+  begin
+    c_expr.expr &:= "(";
+    process_expr(params[3], c_expr);
+    c_expr.expr &:= ")";
   end func;
 
 
