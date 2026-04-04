@@ -1335,13 +1335,13 @@ objectType drw_put_scaled (listType arguments)
 
 
 
-objectType drw_rgbcol (listType arguments)
+objectType drw_rgb_color (listType arguments)
 
-  { /* drw_rgbcol */
+  { /* drw_rgb_color */
     return bld_int_temp(
         drwRgbColor(take_int(arg_1(arguments)), take_int(arg_2(arguments)),
                     take_int(arg_3(arguments))));
-  } /* drw_rgbcol */
+  } /* drw_rgb_color */
 
 
 
