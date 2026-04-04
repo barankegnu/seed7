@@ -181,6 +181,30 @@ objectType ace_gen (listType arguments)
 
 
 /**
+ *  Compute the hash value of an action entry.
+ *  @return the hash value.
+ */
+objectType ace_hashcode (listType arguments)
+
+  {
+    const_actEntryType actEntry;
+    intType hashCode;
+
+  /* ace_hashcode */
+    isit_actentry(arg_1(arguments));
+    actEntry = take_actentry(arg_1(arguments));
+    if (unlikely(actEntry == NULL)) {
+      logError(printf("ace_hashcode: NULL action entry.\n"););
+      return raise_exception(SYS_RNG_EXCEPTION);
+    } else {
+      hashCode = actEntry - actTable.table;
+      return bld_int_temp(hashCode);
+    } /* if */
+  } /* ace_hashcode */
+
+
+
+/**
  *  Convert an integer number to an action.
  *  @param ordinal/arg_1 Number to be converted.
  *  @return an action which corresponds to the given integer.

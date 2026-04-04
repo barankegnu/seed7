@@ -79,6 +79,7 @@ static const actEntryRecord actEntryTable[] = {
     { "ACE_CREATE",                   ace_create,                   },
     { "ACE_EQ",                       ace_eq,                       },
     { "ACE_GEN",                      ace_gen,                      },
+    { "ACE_HASHCODE",                 ace_hashcode,                 },
     { "ACE_ICONV1",                   ace_iconv1,                   },
     { "ACE_ICONV3",                   ace_iconv3,                   },
     { "ACE_NE",                       ace_ne,                       },
