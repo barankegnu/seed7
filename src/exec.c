@@ -795,6 +795,7 @@ objectType exec_call (objectType object)
       case ENUMLITERALOBJECT:
       case REFOBJECT:
       case REFLISTOBJECT:
+      case ACTENTRYOBJECT:
       case TYPEOBJECT:
       case INTERFACEOBJECT:
       case PROGOBJECT:
