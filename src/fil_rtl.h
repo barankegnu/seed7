@@ -46,44 +46,49 @@ EXTERN fileRecord stderrFileRecord;
     (aFile)->readingAllowed = (readingOkay); \
     (aFile)->writingAllowed = (writingOkay);
 
-int offsetSeek (cFileType aFile, const os_off_t anOffset, const int origin);
+int offsetSeek (cFileType aFile, const os_off_t anOffset,
+                const int origin);
 memSizeType remainingBytesInFile (cFileType aFile);
 intType getFileLengthUsingSeek (cFileType aFile);
 bigIntType getBigFileLengthUsingSeek (cFileType aFile);
-bigIntType filBigLng (fileType aFile);
-void filBigSeek (fileType aFile, const const_bigIntType big_position);
-bigIntType filBigTell (fileType aFile);
-void filClose (fileType aFile);
+bigIntType filBigLng (const const_fileType aFile);
+void filBigSeek (const const_fileType aFile,
+                 const const_bigIntType big_position);
+bigIntType filBigTell (const const_fileType aFile);
+void filClose (const fileType aFile);
 void filCpy (fileType *const dest, const fileType source);
 fileType filCreate (const fileType source);
 void filDestr (const fileType oldFile);
-boolType filEof (fileType inFile);
-void filFlush (fileType outFile);
-void filFree (fileType oldFile);
-charType filGetcChkCtrlC (fileType inFile);
-striType filGets (fileType inFile, intType length);
-striType filGetsChkCtrlC (fileType inFile, intType length);
-boolType filHasNext (fileType inFile);
-boolType filHasNextChkCtrlC (fileType inFile);
-striType filLineRead (fileType inFile, charType *const terminationChar);
-striType filLineReadChkCtrlC (fileType inFile,
+boolType filEof (const const_fileType inFile);
+void filFlush (const const_fileType outFile);
+void filFree (const fileType oldFile);
+charType filGetcChkCtrlC (const const_fileType inFile);
+striType filGets (const const_fileType inFile, intType length);
+striType filGetsChkCtrlC (const const_fileType inFile, intType length);
+boolType filHasNext (const const_fileType inFile);
+boolType filHasNextChkCtrlC (const const_fileType inFile);
+striType filLineRead (const const_fileType inFile,
+                      charType *const terminationChar);
+striType filLineReadChkCtrlC (const const_fileType inFile,
     charType *const terminationChar);
-striType filLiteral (fileType aFile);
-intType filLng (fileType aFile);
+striType filLiteral (const const_fileType aFile);
+intType filLng (const const_fileType aFile);
 fileType filOpen (const const_striType path, const const_striType mode);
 fileType filOpenNullDevice (void);
-void filPclose (fileType aPipe);
+void filPclose (const fileType aPipe);
 fileType filPopen (const const_striType command,
     const const_striType parameters, const const_striType mode);
 void filPrint (const const_striType stri);
-void filSeek (fileType aFile, intType file_position);
-boolType filSeekable (fileType aFile);
-void filSetbuf (fileType aFile, intType mode, intType size);
-intType filTell (fileType aFile);
-striType filTerminatedRead (fileType inFile, charType terminator,
+void filSeek (const const_fileType aFile, intType file_position);
+boolType filSeekable (const const_fileType aFile);
+void filSetbuf (const const_fileType aFile, intType mode, intType size);
+intType filTell (const const_fileType aFile);
+striType filTerminatedRead (const const_fileType inFile,
+                            charType terminator,
+                            charType *const terminationChar);
+void filTruncate (const const_fileType aFile, intType length);
+striType filWordRead (const const_fileType inFile,
+                      charType *const terminationChar);
+striType filWordReadChkCtrlC (const const_fileType inFile,
     charType *const terminationChar);
-void filTruncate (fileType aFile, intType length);
-striType filWordRead (fileType inFile, charType *const terminationChar);
-striType filWordReadChkCtrlC (fileType inFile,
-    charType *const terminationChar);
-void filWrite (fileType outFile, const const_striType stri);
+void filWrite (const const_fileType outFile, const const_striType stri);

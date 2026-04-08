@@ -775,7 +775,8 @@ static charType doGetcFromTerminal (cFileType inFile)
 
 
 
-static striType doGetsFromTerminal (fileType inFile, intType length)
+static striType doGetsFromTerminal (const const_fileType inFile,
+    intType length)
 
   {
     cFileType cInFile;
@@ -828,7 +829,7 @@ static striType doGetsFromTerminal (fileType inFile, intType length)
 
 
 
-static striType doLineReadFromTerminal (fileType inFile,
+static striType doLineReadFromTerminal (const const_fileType inFile,
     charType *const terminationChar)
 
   {
@@ -864,7 +865,7 @@ static striType doLineReadFromTerminal (fileType inFile,
 
 
 
-static striType doWordReadFromTerminal (fileType inFile,
+static striType doWordReadFromTerminal (const const_fileType inFile,
     charType *const terminationChar)
 
   {
@@ -908,7 +909,7 @@ static striType doWordReadFromTerminal (fileType inFile,
  *             file length reported by the system is negative.
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  */
-bigIntType filBigLng (fileType aFile)
+bigIntType filBigLng (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -943,7 +944,8 @@ bigIntType filBigLng (fileType aFile)
  *             file position type.
  *  @exception FILE_ERROR A system function returns an error.
  */
-void filBigSeek (fileType aFile, const const_bigIntType position)
+void filBigSeek (const const_fileType aFile,
+    const const_bigIntType position)
 
   {
     cFileType cFile;
@@ -993,7 +995,7 @@ void filBigSeek (fileType aFile, const const_bigIntType position)
  *             file position reported by the system is negative.
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  */
-bigIntType filBigTell (fileType aFile)
+bigIntType filBigTell (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -1038,7 +1040,7 @@ bigIntType filBigTell (fileType aFile)
  *  Close a clib_file.
  *  @exception FILE_ERROR A system function returns an error.
  */
-void filClose (fileType aFile)
+void filClose (const fileType aFile)
 
   { /* filClose */
     logFunction(printf("filClose(" FMT_U_MEM " %s%d (usage=" FMT_U "))\n",
@@ -1213,7 +1215,7 @@ void filDestrGeneric (const genericType old_value)
 
 
 
-boolType filEof (fileType inFile)
+boolType filEof (const const_fileType inFile)
 
   {
     cFileType cInFile;
@@ -1239,7 +1241,7 @@ boolType filEof (fileType inFile)
 
 
 #ifdef OUT_OF_ORDER
-intType filFileType (fileType aFile)
+intType filFileType (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -1279,7 +1281,7 @@ intType filFileType (fileType aFile)
 
 
 
-void filFlush (fileType outFile)
+void filFlush (const const_fileType outFile)
 
   {
     cFileType cOutFile;
@@ -1299,7 +1301,7 @@ void filFlush (fileType outFile)
 
 
 
-void filFree (fileType oldFile)
+void filFree (const fileType oldFile)
 
   { /* filFree */
     logFunction(printf("filFree(" FMT_U_MEM " %s%d (usage=" FMT_U "))\n",
@@ -1319,7 +1321,7 @@ void filFree (fileType oldFile)
  *  Read a character from a clib_file.
  *  @return the character read, or EOF at the end of the file.
  */
-charType filGetcChkCtrlC (fileType inFile)
+charType filGetcChkCtrlC (const const_fileType inFile)
 
   {
     cFileType cInFile;
@@ -1370,7 +1372,7 @@ charType filGetcChkCtrlC (fileType inFile)
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  *  @exception FILE_ERROR A system function returns an error.
  */
-striType filGets (fileType inFile, intType length)
+striType filGets (const const_fileType inFile, intType length)
 
   {
     cFileType cInFile;
@@ -1502,7 +1504,7 @@ striType filGets (fileType inFile, intType length)
 
 
 
-striType filGetsChkCtrlC (fileType inFile, intType length)
+striType filGetsChkCtrlC (const const_fileType inFile, intType length)
 
   {
     cFileType cInFile;
@@ -1540,7 +1542,7 @@ striType filGetsChkCtrlC (fileType inFile, intType length)
  *  This function allows a file to be handled like an iterator.
  *  @return FALSE if 'getc' would return EOF, TRUE otherwise.
  */
-boolType filHasNext (fileType inFile)
+boolType filHasNext (const const_fileType inFile)
 
   {
     cFileType cInFile;
@@ -1583,7 +1585,7 @@ boolType filHasNext (fileType inFile)
 
 
 
-boolType filHasNextChkCtrlC (fileType inFile)
+boolType filHasNextChkCtrlC (const const_fileType inFile)
 
   {
     cFileType cInFile;
@@ -1643,7 +1645,8 @@ boolType filHasNextChkCtrlC (fileType inFile)
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  *  @exception FILE_ERROR A system function returns an error.
  */
-striType filLineRead (fileType inFile, charType *const terminationChar)
+striType filLineRead (const const_fileType inFile,
+    charType *const terminationChar)
 
   {
     cFileType cInFile;
@@ -1733,7 +1736,8 @@ striType filLineRead (fileType inFile, charType *const terminationChar)
 
 
 
-striType filLineReadChkCtrlC (fileType inFile, charType *const terminationChar)
+striType filLineReadChkCtrlC (const const_fileType inFile,
+    charType *const terminationChar)
 
   {
     cFileType cInFile;
@@ -1767,7 +1771,7 @@ striType filLineReadChkCtrlC (fileType inFile, charType *const terminationChar)
 
 
 
-striType filLiteral (fileType aFile)
+striType filLiteral (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -1805,7 +1809,7 @@ striType filLiteral (fileType aFile)
  *  @exception FILE_ERROR A system function returns an error or the
  *             file length reported by the system is negative.
  */
-intType filLng (fileType aFile)
+intType filLng (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -2072,7 +2076,7 @@ fileType filOpenNullDevice (void)
  *  @param aPipe Pipe file to be closed (created by 'filPopen').
  *  @exception FILE_ERROR A system function returned an error.
  */
-void filPclose (fileType aPipe)
+void filPclose (const fileType aPipe)
 
   { /* filPclose */
     logFunction(printf("filPclose(%s%d)\n",
@@ -2238,7 +2242,7 @@ void filPrint (const const_striType stri)
  *             file position type.
  *  @exception FILE_ERROR A system function returns an error.
  */
-void filSeek (fileType aFile, intType position)
+void filSeek (const const_fileType aFile, intType position)
 
   {
     cFileType cFile;
@@ -2297,7 +2301,7 @@ void filSeek (fileType aFile, intType position)
  *  can be used to set and and obtain the current file position.
  *  @return TRUE, if 'aFile' is seekable, FALSE otherwise.
  */
-boolType filSeekable (fileType aFile)
+boolType filSeekable (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -2338,7 +2342,7 @@ boolType filSeekable (fileType aFile)
 
 
 
-void filSetbuf (fileType aFile, intType mode, intType size)
+void filSetbuf (const const_fileType aFile, intType mode, intType size)
 
   {
     cFileType cFile;
@@ -2379,7 +2383,7 @@ void filSetbuf (fileType aFile, intType mode, intType size)
  *  @exception FILE_ERROR A system function returns an error or the
  *             file position reported by the system is negative.
  */
-intType filTell (fileType aFile)
+intType filTell (const const_fileType aFile)
 
   {
     cFileType cFile;
@@ -2437,8 +2441,8 @@ intType filTell (fileType aFile)
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  *  @exception FILE_ERROR A system function returns an error.
  */
-striType filTerminatedRead (fileType inFile, charType terminator,
-    charType *const terminationChar)
+striType filTerminatedRead (const const_fileType inFile,
+    charType terminator, charType *const terminationChar)
 
   {
     cFileType cInFile;
@@ -2542,7 +2546,7 @@ striType filTerminatedRead (fileType inFile, charType terminator,
  *             used by the system function.
  *  @exception FILE_ERROR A system function returns an error.
  */
-void filTruncate (fileType aFile, intType length)
+void filTruncate (const const_fileType aFile, intType length)
 
   {
     cFileType cFile;
@@ -2622,7 +2626,8 @@ void filTruncate (fileType aFile, intType length)
  *  @exception MEMORY_ERROR Not enough memory to represent the result.
  *  @exception FILE_ERROR A system function returns an error.
  */
-striType filWordRead (fileType inFile, charType *const terminationChar)
+striType filWordRead (const const_fileType inFile,
+    charType *const terminationChar)
 
   {
     cFileType cInFile;
@@ -2717,7 +2722,8 @@ striType filWordRead (fileType inFile, charType *const terminationChar)
 
 
 
-striType filWordReadChkCtrlC (fileType inFile, charType *const terminationChar)
+striType filWordReadChkCtrlC (const const_fileType inFile,
+    charType *const terminationChar)
 
   {
     cFileType cInFile;
@@ -2757,7 +2763,7 @@ striType filWordReadChkCtrlC (fileType inFile, charType *const terminationChar)
  *  @exception RANGE_ERROR The string contains a character that does
  *             not fit into a byte.
  */
-void filWrite (fileType outFile, const const_striType stri)
+void filWrite (const const_fileType outFile, const const_striType stri)
 
   {
     cFileType cOutFile;
