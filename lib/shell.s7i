@@ -148,6 +148,7 @@ const proc: cmd_sh (in string: cmdAndParams) is func
  *  joined to a space separated list of parameters.
  *  @return a string which can be used as shell parameter.
  *  @exception MEMORY_ERROR Not enough memory to convert 'stri'.
+ *  @exception RANGE_ERROR An illegal character is in 'stri'.
  *)
 const func string: shellEscape (in string: stri)   is action "CMD_SHELL_ESCAPE";
 
