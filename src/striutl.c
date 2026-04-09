@@ -3476,8 +3476,6 @@ os_striType cp_to_command (const const_striType command,
 striType shellEscape (const const_striType stri, errInfoType *err_info)
 
   {
-    /* A shell parameter might start and end with quote ("): */
-    const memSizeType numOfQuotes = 0;
     /* Maximum escape sequence length in shell parameter: */
     const memSizeType escSequenceMax = STRLEN("\\=");
     memSizeType inPos;
@@ -3488,8 +3486,8 @@ striType shellEscape (const const_striType stri, errInfoType *err_info)
   /* shellEscape */
     logFunction(printf("shellEscape(\"%s\")\n",
                        striAsUnquotedCStri(stri)););
-    if (unlikely(stri->size > (MAX_STRI_LEN - numOfQuotes) / escSequenceMax ||
-                 !ALLOC_STRI_SIZE_OK(result, escSequenceMax * stri->size + numOfQuotes))) {
+    if (unlikely(stri->size > MAX_STRI_LEN / escSequenceMax ||
+                 !ALLOC_STRI_SIZE_OK(result, escSequenceMax * stri->size))) {
       *err_info = MEMORY_ERROR;
       result = NULL;
     } else {
@@ -3517,13 +3515,13 @@ striType shellEscape (const const_striType stri, errInfoType *err_info)
         } /* switch */
       } /* for */
       if (unlikely(*err_info != OKAY_NO_ERROR)) {
-        FREE_STRI2(result, escSequenceMax * stri->size + numOfQuotes);
+        FREE_STRI2(result, escSequenceMax * stri->size);
         result = NULL;
       } else {
         REALLOC_STRI_SIZE_SMALLER2(resized_result, result,
-            escSequenceMax * stri->size + numOfQuotes, outPos);
+            escSequenceMax * stri->size, outPos);
         if (unlikely(resized_result == NULL)) {
-          FREE_STRI2(result, escSequenceMax * stri->size + numOfQuotes);
+          FREE_STRI2(result, escSequenceMax * stri->size);
           *err_info = MEMORY_ERROR;
           result = NULL;
         } else {
