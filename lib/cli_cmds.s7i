@@ -1089,20 +1089,21 @@ const func boolean: doCommands (inout string: command) is func
       done := doOneCommand(command, commandOutput);
       if done then
         skipWhiteSpace(command);
-        redirect := getWord(command);
-        if redirect = ">" then
-          skipWhiteSpace(command);
-          fileName := getCommandParameter(command);
-          if fileName <> "/dev/null" and fileName <> "NUL:" and fileName <> "NUL" then
-            fileName := convDosPath(fileName);
-            putf(fileName, commandOutput);
-          end if;
-        elsif redirect = ">>" then
+        if startsWith(command, ">>") then
+          command := command[3 ..];
           skipWhiteSpace(command);
           fileName := getCommandParameter(command);
           if fileName <> "/dev/null" and fileName <> "NUL:" and fileName <> "NUL" then
             fileName := convDosPath(fileName);
             appendToFile(fileName, commandOutput);
+          end if;
+        elsif startsWith(command, ">") then
+          command := command[2 ..];
+          skipWhiteSpace(command);
+          fileName := getCommandParameter(command);
+          if fileName <> "/dev/null" and fileName <> "NUL:" and fileName <> "NUL" then
+            fileName := convDosPath(fileName);
+            putf(fileName, commandOutput);
           end if;
         elsif commandOutput <> "" then
           write(commandOutput);
