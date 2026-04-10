@@ -4764,75 +4764,6 @@ intType cmdShell (const const_striType command, const const_striType parameters)
 
 
 
-intType cmdShellCommand (const const_striType command,
-    const const_rtlArrayType parameters, const const_striType redirectStdin,
-    const const_striType redirectStdout, const const_striType redirectStderr)
-
-  {
-    errInfoType err_info = OKAY_NO_ERROR;
-    striType commandLine;
-    os_striType os_command;
-    intType returnCode;
-
-  /* cmdShellCommand */
-    logFunction(printf("cmdShellCommand(\"%s\"",
-                       striAsUnquotedCStri(command));
-                printParameters(parameters);
-                printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
-                printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
-                printf(", \"%s\")\n",
-                       striAsUnquotedCStri(redirectStderr)););
-    commandLine = createCommandLine(command, parameters,
-        redirectStdin, redirectStdout, redirectStderr, &err_info);
-    if (unlikely(commandLine == NULL)) {
-      logError(printf("cmdShellCommand: createCommandLine(\"%s\"",
-                      striAsUnquotedCStri(command));
-               printParameters(parameters);
-               printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
-               printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
-               printf(", \"%s\", *) failed:\n",
-                      striAsUnquotedCStri(redirectStderr));
-               printf("err_info=%d\n", err_info););
-      raise_error(err_info);
-      returnCode = 0;
-    } else {
-      os_command = stri_to_os_stri(commandLine, &err_info);
-      FREE_STRI(commandLine);
-      if (unlikely(os_command == NULL)) {
-        logError(printf("cmdShellCommand: "
-                        "stri_to_os_stri(\"%s\") failed:\n"
-                        "err_info=%d\n",
-                        striAsUnquotedCStri(commandLine), err_info););
-        raise_error(err_info);
-        returnCode = 0;
-      } else {
-        logMessage(printf("cmdShellCommand: "
-                          "os_command: \"" FMT_S_OS "\"\n",
-                          os_command););
-        returnCode = (intType) os_system(os_command);
-        logErrorIfTrue(returnCode != 0,
-                       printf("cmdShellCommand(\"%s\"",
-                              striAsUnquotedCStri(command));
-                       printParameters(parameters);
-                       printf(", \"%s\"",
-                              striAsUnquotedCStri(redirectStdin));
-                       printf(", \"%s\"",
-                              striAsUnquotedCStri(redirectStdout));
-                       printf(", \"%s\"):\n",
-                              striAsUnquotedCStri(redirectStderr));
-                       printf("system(\"" FMT_S_OS "\") failed:\n",
-                              os_command);
-                       printf("errno=%d\nerror: %s\n", errno, strerror(errno));
-                       printf("returnCode=" FMT_D "\n", returnCode););
-        os_stri_free(os_command);
-      } /* if */
-    } /* if */
-    logFunction(printf("cmdShellCommand --> " FMT_D "\n", returnCode););
-    return returnCode;
-  } /* cmdShellCommand */
-
-
-
 /**
  *  Convert a string, such that it can be used as shell parameter.
  *  The function adds escape characters or quotations to a string.
@@ -4865,6 +4796,75 @@ striType cmdShellEscape (const const_striType stri)
                        striAsUnquotedCStri(result)););
     return result;
   } /* cmdShellEscape */
+
+
+
+intType cmdShellExecute (const const_striType command,
+    const const_rtlArrayType parameters, const const_striType redirectStdin,
+    const const_striType redirectStdout, const const_striType redirectStderr)
+
+  {
+    errInfoType err_info = OKAY_NO_ERROR;
+    striType commandLine;
+    os_striType os_command;
+    intType returnCode;
+
+  /* cmdShellExecute */
+    logFunction(printf("cmdShellExecute(\"%s\"",
+                       striAsUnquotedCStri(command));
+                printParameters(parameters);
+                printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+                printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
+                printf(", \"%s\")\n",
+                       striAsUnquotedCStri(redirectStderr)););
+    commandLine = createCommandLine(command, parameters,
+        redirectStdin, redirectStdout, redirectStderr, &err_info);
+    if (unlikely(commandLine == NULL)) {
+      logError(printf("cmdShellExecute: createCommandLine(\"%s\"",
+                      striAsUnquotedCStri(command));
+               printParameters(parameters);
+               printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+               printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
+               printf(", \"%s\", *) failed:\n",
+                      striAsUnquotedCStri(redirectStderr));
+               printf("err_info=%d\n", err_info););
+      raise_error(err_info);
+      returnCode = 0;
+    } else {
+      os_command = stri_to_os_stri(commandLine, &err_info);
+      FREE_STRI(commandLine);
+      if (unlikely(os_command == NULL)) {
+        logError(printf("cmdShellExecute: "
+                        "stri_to_os_stri(\"%s\") failed:\n"
+                        "err_info=%d\n",
+                        striAsUnquotedCStri(commandLine), err_info););
+        raise_error(err_info);
+        returnCode = 0;
+      } else {
+        logMessage(printf("cmdShellExecute: "
+                          "os_command: \"" FMT_S_OS "\"\n",
+                          os_command););
+        returnCode = (intType) os_system(os_command);
+        logErrorIfTrue(returnCode != 0,
+                       printf("cmdShellExecute(\"%s\"",
+                              striAsUnquotedCStri(command));
+                       printParameters(parameters);
+                       printf(", \"%s\"",
+                              striAsUnquotedCStri(redirectStdin));
+                       printf(", \"%s\"",
+                              striAsUnquotedCStri(redirectStdout));
+                       printf(", \"%s\"):\n",
+                              striAsUnquotedCStri(redirectStderr));
+                       printf("system(\"" FMT_S_OS "\") failed:\n",
+                              os_command);
+                       printf("errno=%d\nerror: %s\n", errno, strerror(errno));
+                       printf("returnCode=" FMT_D "\n", returnCode););
+        os_stri_free(os_command);
+      } /* if */
+    } /* if */
+    logFunction(printf("cmdShellExecute --> " FMT_D "\n", returnCode););
+    return returnCode;
+  } /* cmdShellExecute */
 
 
 

@@ -52,7 +52,7 @@ const func integer: shell (in string: command,
                            in array string: parameters,
                            in string: redirectStdin,
                            in string: redirectStdout,
-                           in string: redirectStderr) is action "CMD_SHELL_COMMAND";
+                           in string: redirectStderr) is action "CMD_SHELL_EXECUTE";
 
 
 (**
