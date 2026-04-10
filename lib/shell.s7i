@@ -192,13 +192,6 @@ const proc: shellCmd (in string: command, in string: parameters) is func
   end func;
 
 
-# The function cmd_sh() is deprecated. Use shellCmd() instead.
-const proc: cmd_sh (in string: command, in string: parameters) is func
-  begin
-    ignore(shell(command, parameters));
-  end func;
-
-
 (**
  *  Executes a command using the shell of the operating system.
  *  The command path must use the standard path representation.
@@ -224,13 +217,6 @@ const proc: shellCmd (in string: cmdAndParams) is func
     if shell(cmdAndParams) <> 0 then
       raise FILE_ERROR;
     end if;
-  end func;
-
-
-# The function cmd_sh() is deprecated. Use shellCmd() instead.
-const proc: cmd_sh (in string: cmdAndParams) is func
-  begin
-    ignore(shell(cmdAndParams));
   end func;
 
 
