@@ -4705,6 +4705,41 @@ void cmdSetSearchPath (const const_rtlArrayType searchPath)
 
 
 
+striType cmdShellCommandLine (const const_striType command,
+    const const_rtlArrayType parameters, const const_striType redirectStdin,
+    const const_striType redirectStdout, const const_striType redirectStderr)
+
+  {
+    errInfoType err_info = OKAY_NO_ERROR;
+    striType commandLine;
+
+  /* cmdShellCommandLine */
+    logFunction(printf("cmdShellCommandLine(\"%s\"",
+                       striAsUnquotedCStri(command));
+                printParameters(parameters);
+                printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+                printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
+                printf(", \"%s\")\n",
+                       striAsUnquotedCStri(redirectStderr)););
+    commandLine = createCommandLine(command, parameters,
+        redirectStdin, redirectStdout, redirectStderr, &err_info);
+    if (unlikely(commandLine == NULL)) {
+      logError(printf("cmdShellCommandLine: createCommandLine(\"%s\"",
+                      striAsUnquotedCStri(command));
+               printParameters(parameters);
+               printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+               printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
+               printf(", \"%s\", *) failed:\n",
+                      striAsUnquotedCStri(redirectStderr));
+               printf("err_info=%d\n", err_info););
+      raise_error(err_info);
+    } /* if */
+    logFunction(printf("cmdShellCommandLine --> \"%s\"\n", commandLine););
+    return commandLine;
+  } /* cmdShellCommandLine */
+
+
+
 /**
  *  Convert a string, such that it can be used as shell parameter.
  *  The function adds escape characters or quotations to a string.

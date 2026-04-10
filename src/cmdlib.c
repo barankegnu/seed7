@@ -1353,6 +1353,43 @@ objectType cmd_set_search_path (listType arguments)
 
 
 
+objectType cmd_shell_command_line (listType arguments)
+
+  {
+    rtlArrayType parameters;
+    striType result;
+
+  /* cmd_shell_command_line */
+    isit_stri(arg_1(arguments));
+    isit_array(arg_2(arguments));
+    isit_stri(arg_3(arguments));
+    isit_stri(arg_4(arguments));
+    isit_stri(arg_5(arguments));
+    logFunction(printf("cmd_shell_command_line(\"%s\", arr, %d, %d, %d)\n",
+                       striAsUnquotedCStri(take_stri(arg_1(arguments))));
+                printf(", \"%s\"",
+                       striAsUnquotedCStri(take_stri(arg_3(arguments))));
+                printf(", \"%s\"",
+                       striAsUnquotedCStri(take_stri(arg_4(arguments))));
+                printf(", \"%s\"",
+                       striAsUnquotedCStri(take_stri(arg_5(arguments)))););
+    parameters = gen_rtl_array(take_array(arg_2(arguments)));
+    if (parameters == NULL) {
+      return raise_exception(SYS_MEM_EXCEPTION);
+    } else {
+      result = cmdShellCommandLine(take_stri(arg_1(arguments)), parameters,
+                                   take_stri(arg_3(arguments)),
+                                   take_stri(arg_4(arguments)),
+                                   take_stri(arg_5(arguments)));
+      FREE_RTL_ARRAY(parameters, arraySize(parameters));
+    } /* if */
+    logFunction(printf("cmd_shell_command_line --> \"%s\"\n",
+                       striAsUnquotedCStri(result)););
+    return bld_stri_temp(result);
+  } /* cmd_shell_command_line */
+
+
+
 /**
  *  Convert a string, such that it can be used as shell parameter.
  *  The function adds escape characters or quotations to a string.
@@ -1403,8 +1440,8 @@ objectType cmd_shell_execute (listType arguments)
                                take_stri(arg_5(arguments)));
       FREE_RTL_ARRAY(parameters, arraySize(parameters));
     } /* if */
-    logFunction(printf("cmd_shell_execute --> " FMT_U_MEM "\n",
-                       (memSizeType) result););
+    logFunction(printf("cmd_shell_execute --> " FMT_D "\n",
+                       result););
     return bld_int_temp(result);
   } /* cmd_shell_execute */
 
