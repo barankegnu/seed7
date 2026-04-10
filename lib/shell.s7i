@@ -166,12 +166,18 @@ const func integer: shell (in string: cmdAndParams) is func
 
 (**
  *  Use the shell to execute a ''command'' with ''parameters''.
- *  Parameters which contain a space must be enclosed in double
- *  quotes (E.g.: shellCmd("aCommand", "\"par 1\" par2"); ). The
- *  commands supported and the format of the ''parameters'' are not
- *  covered by the description of the ''shellCmd'' function. Due to the
- *  usage of the operating system shell and external programs, it is
- *  hard to write portable programs, which use the ''shellCmd'' function.
+ *  Parameters which contain a space must be either enclosed in
+ *  double quotes (E.g.: shell("aCommand", "\"do it\" param2"); )
+ *  or the spaces in the parameter must be preceded by a backslash
+ *  (E.g.: shell("aCommand", "do\\ it param2"); ). Escape
+ *  characters and quotations are added to the ''command'' and all
+ *  ''parameters'' before they are forwarded to the operating system
+ *  shell. This way it is not possible to inject a command in a
+ *  parameter. The commands supported and the format of the
+ *  ''parameters'' are not covered by the description of the
+ *  ''shellCmd'' function. Due to the usage of the operating system
+ *  shell and external programs, it is hard to write portable
+ *  programs, which use the ''shellCmd'' function.
  *  @param command Name of the command to be executed. A path must
  *         use the standard path representation.
  *  @param parameters Space separated list of parameters for the
@@ -196,15 +202,18 @@ const proc: cmd_sh (in string: command, in string: parameters) is func
 (**
  *  Executes a command using the shell of the operating system.
  *  The command path must use the standard path representation.
- *  Spaces in the command must be preceded by a backslash
- *  (E.g.: shellCmd("do\\ it"); ). Alternatively the command can
- *  be enclosed in double quotes (E.g.: shellCmd("\"do it\""); ).
- *  Command parameters containing a space must be enclosed in double
- *  quotes (E.g.: shellCmd("do_it \"par 1\" par2"); ). The commands
- *  supported and the format of the ''parameters'' are not covered
- *  by the description of the ''shellCmd'' function. Due to the usage
- *  of the operating system shell and external programs, it is hard
- *  to write portable programs, which use the ''shellCmd'' function.
+ *  If the command or a parameter contains a space it must be either
+ *  enclosed in double quotes (E.g.: shell("aCmd \"do it\" par2"); )
+ *  or the spaces in the command or parameter must be preceded by a
+ *  backslash (E.g.: shell("aCommand do\\ it param2"); ). Escape
+ *  characters and quotations are added to the command and all
+ *  parameters before they are forwarded to the operating system
+ *  shell. This way it is not possible to inject a command in a
+ *  parameter. The commands supported and the format of the
+ *  ''parameters'' are not covered by the description of the
+ *  ''shellCmd'' function. Due to the usage of the operating system
+ *  shell and external programs, it is hard to write portable
+ *  programs, which use the ''shellCmd'' function.
  *  @param cmdAndParams Command to be executed and optional space
  *         separated list of parameters. Command and parameters
  *         must be space separated.
