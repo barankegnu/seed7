@@ -1354,31 +1354,6 @@ objectType cmd_set_search_path (listType arguments)
 
 
 /**
- *  Use the shell to execute a 'command' with 'parameters'.
- *  Parameters which contain a space must be enclosed in double
- *  quotes (E.g.: shell("aCommand", "\"par 1\" par2"); ). The
- *  commands supported and the format of the 'parameters' are not
- *  covered by the description of the 'shell' function. Due to the
- *  usage of the operating system shell and external programs, it is
- *  hard to write portable programs, which use the 'shell' function.
- *  @param command/arg_1 Name of the command to be executed. A path
- *         must use the standard path representation.
- *  @param parameters/arg_2 Space separated list of parameters for
- *         the 'command', or "" if there are no parameters.
- *  @return the return code of the executed command or of the shell.
- */
-objectType cmd_shell (listType arguments)
-
-  { /* cmd_shell */
-    isit_stri(arg_1(arguments));
-    isit_stri(arg_2(arguments));
-    return bld_int_temp(
-        cmdShell(take_stri(arg_1(arguments)), take_stri(arg_2(arguments))));
-  } /* cmd_shell */
-
-
-
-/**
  *  Convert a string, such that it can be used as shell parameter.
  *  The function adds escape characters or quotations to a string.
  *  The result is useable as parameter for the functions 'cmdShell',

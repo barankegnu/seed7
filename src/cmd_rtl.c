@@ -4706,65 +4706,6 @@ void cmdSetSearchPath (const const_rtlArrayType searchPath)
 
 
 /**
- *  Use the shell to execute a 'command' with 'parameters'.
- *  Parameters which contain a space must be enclosed in double
- *  quotes (E.g.: shell("aCommand", "\"par 1\" par2"); ). The
- *  commands supported and the format of the 'parameters' are not
- *  covered by the description of the 'shell' function. Due to the
- *  usage of the operating system shell and external programs, it is
- *  hard to write portable programs, which use the 'shell' function.
- *  @param command Name of the command to be executed. A path must
- *         use the standard path representation.
- *  @param parameters Space separated list of parameters for the
- *         'command', or "" if there are no parameters.
- *  @return the return code of the executed command or of the shell.
- */
-intType cmdShell (const const_striType command, const const_striType parameters)
-
-  {
-    os_striType os_command;
-    errInfoType err_info = OKAY_NO_ERROR;
-    intType result;
-
-  /* cmdShell */
-    logFunction(printf("cmdShell(\"%s\", ",
-                       striAsUnquotedCStri(command));
-                printf("\"%s\")\n", striAsUnquotedCStri(parameters)););
-#if defined USE_EXTENDED_LENGTH_PATH && USE_EXTENDED_LENGTH_PATH
-    adjustCwdForShell(&err_info);
-#endif
-    os_command = cp_to_command(command, parameters, &err_info);
-    if (unlikely(os_command == NULL)) {
-      logError(printf("cmdShell: cp_to_command(\"%s\", ",
-                      striAsUnquotedCStri(command));
-               printf("\"%s\", *) failed:\n"
-                      "err_info=%d\n",
-                      striAsUnquotedCStri(parameters), err_info););
-      raise_error(err_info);
-      result = 0;
-    } else {
-      logMessage(printf("cmdShell: os_command: \"" FMT_S_OS "\"\n",
-                        os_command););
-      result = (intType) os_system(os_command);
-      logErrorIfTrue(result != 0,
-                     printf("cmdShell(\"%s\", ",
-                            striAsUnquotedCStri(command));
-                     printf("\"%s\"):\n",
-                            striAsUnquotedCStri(parameters));
-                     printf("system(\"" FMT_S_OS "\") failed:\n",
-                            os_command);
-                     printf("errno=%d\nerror: %s\n",
-                            errno, strerror(errno));
-                     printf("result=" FMT_D "\n", result););
-      FREE_OS_STRI(os_command);
-    } /* if */
-    logFunction(printf("cmdShell --> " FMT_D "\n", result););
-    return result;
-  } /* cmdShell */
-
-
-
-/**
  *  Convert a string, such that it can be used as shell parameter.
  *  The function adds escape characters or quotations to a string.
  *  The result is useable as parameter for the functions 'cmdShell'

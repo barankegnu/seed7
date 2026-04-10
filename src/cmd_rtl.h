@@ -111,7 +111,6 @@ void cmdSetMTime (const const_striType filePath,
     intType year, intType month, intType day, intType hour,
     intType min, intType sec, intType micro_sec, intType time_zone);
 void cmdSetSearchPath (const const_rtlArrayType searchPath);
-intType cmdShell (const const_striType command, const const_striType parameters);
 striType cmdShellEscape (const const_striType stri);
 intType cmdShellExecute (const const_striType command,
     const const_rtlArrayType parameters, const const_striType redirectStdin,

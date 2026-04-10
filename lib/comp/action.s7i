@@ -577,8 +577,6 @@ const proc: process_action (in reference: function, in ref_list: params,
         process(CMD_SET_OWNER_OF_SYMLINK, function, params, c_expr);
       when {"CMD_SET_SEARCH_PATH"}:
         process(CMD_SET_SEARCH_PATH, function, params, c_expr);
-      when {"CMD_SHELL"}:
-        process(CMD_SHELL, function, params, c_expr);
       when {"CMD_SHELL_ESCAPE"}:
         process(CMD_SHELL_ESCAPE, function, params, c_expr);
       when {"CMD_SHELL_EXECUTE"}:
