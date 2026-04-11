@@ -1060,6 +1060,7 @@ void filClose (const fileType aFile)
     if (unlikely(aFile->cFile == NULL)) {
       logError(printf("filClose: Called with a closed file.\n"););
       raise_error(FILE_ERROR);
+#if HAS_POPEN
     } else if (aFile->isPipe) {
       if (unlikely(os_pclose(aFile->cFile) == -1)) {
         logError(printf("filClose: pclose(%d) failed:\n"
@@ -1072,6 +1073,7 @@ void filClose (const fileType aFile)
         aFile->cFile = NULL;
       } /* if */
     } else {
+#endif
 #if FCLOSE_FAILS_AFTER_PREVIOUS_ERROR
       clearerr(aFile->cFile);
 #endif
@@ -1087,7 +1089,9 @@ void filClose (const fileType aFile)
       } else {
         aFile->cFile = NULL;
       } /* if */
+#if HAS_POPEN
     } /* if */
+#endif
     logFunction(printf("filClose(" FMT_U_MEM " %d (usage=" FMT_U ")) -->\n",
                        (memSizeType) aFile, safe_fileno(aFile->cFile),
                        aFile->usage_count););
@@ -1334,11 +1338,15 @@ void filFree (const fileType oldFile)
                        oldFile != NULL ? oldFile->usage_count : (uintType) 0););
     assert_file_not_null(oldFile);
     if (oldFile->cFile != NULL) {
+#if HAS_POPEN
       if (oldFile->isPipe) {
         os_pclose(oldFile->cFile);
       } else {
         fclose(oldFile->cFile);
       } /* if */
+#else
+      fclose(oldFile->cFile);
+#endif
     } /* if */
     FREE_RECORD(oldFile, fileRecord, count.files);
   } /* filFree */
