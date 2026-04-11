@@ -339,10 +339,16 @@ static void printParameters (const const_rtlArrayType parameters)
   /* printParameters */
     paramSize = arraySize(parameters);
     for (pos = 0; pos < paramSize; pos++) {
-      printf(", \"%s\"",
+      if (pos != 0) {
+        printf(", ");
+      } /* if */
+      printf("\"%s\"",
              striAsUnquotedCStri(parameters->arr[pos].value.striValue));
     } /* for */
   } /* printParameters */
+
+#else
+#define printParameters(parameters) printf(" *not shown* ");
 #endif
 
 
@@ -2049,11 +2055,11 @@ striType createCommandLine (const const_striType command,
 
   /* createCommandLine */
     numberOfParameters = arraySize(parameters);
-    logFunction(printf("createCommandLine(\"%s\", array[" FMT_D
-                       "]",
+    logFunction(printf("createCommandLine(\"%s\", array[" FMT_D "]: (",
                        striAsUnquotedCStri(command),
                        parameters->max_position);
-                printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+                printParameters(parameters);
+                printf("), \"%s\"", striAsUnquotedCStri(redirectStdin));
                 printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
                 printf(", \"%s\", %d)\n",
                        striAsUnquotedCStri(redirectStderr),
@@ -4714,20 +4720,24 @@ striType cmdShellCommandLine (const const_striType command,
     striType commandLine;
 
   /* cmdShellCommandLine */
-    logFunction(printf("cmdShellCommandLine(\"%s\"",
-                       striAsUnquotedCStri(command));
+    logFunction(printf("cmdShellCommandLine(\"%s\""
+                       ", array[" FMT_D "]: (",
+                       striAsUnquotedCStri(command),
+                       parameters->max_position);
                 printParameters(parameters);
-                printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+                printf("), \"%s\"", striAsUnquotedCStri(redirectStdin));
                 printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
                 printf(", \"%s\")\n",
                        striAsUnquotedCStri(redirectStderr)););
     commandLine = createCommandLine(command, parameters,
         redirectStdin, redirectStdout, redirectStderr, &err_info);
     if (unlikely(commandLine == NULL)) {
-      logError(printf("cmdShellCommandLine: createCommandLine(\"%s\"",
-                      striAsUnquotedCStri(command));
+      logError(printf("cmdShellCommandLine: createCommandLine(\"%s\""
+                      ", array[" FMT_D "]: (",
+                      striAsUnquotedCStri(command),
+                      parameters->max_position);
                printParameters(parameters);
-               printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+               printf("), \"%s\"", striAsUnquotedCStri(redirectStdin));
                printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
                printf(", \"%s\", *) failed:\n",
                       striAsUnquotedCStri(redirectStderr));
@@ -4787,20 +4797,24 @@ intType cmdShellExecute (const const_striType command,
     intType returnCode;
 
   /* cmdShellExecute */
-    logFunction(printf("cmdShellExecute(\"%s\"",
-                       striAsUnquotedCStri(command));
+    logFunction(printf("cmdShellExecute(\"%s\""
+                       ", array[" FMT_D "]: (",
+                       striAsUnquotedCStri(command),
+                       parameters->max_position);
                 printParameters(parameters);
-                printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+                printf("), \"%s\"", striAsUnquotedCStri(redirectStdin));
                 printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
                 printf(", \"%s\")\n",
                        striAsUnquotedCStri(redirectStderr)););
     commandLine = createCommandLine(command, parameters,
         redirectStdin, redirectStdout, redirectStderr, &err_info);
     if (unlikely(commandLine == NULL)) {
-      logError(printf("cmdShellExecute: createCommandLine(\"%s\"",
-                      striAsUnquotedCStri(command));
+      logError(printf("cmdShellExecute: createCommandLine(\"%s\""
+                       ", array[" FMT_D "]: (",
+                       striAsUnquotedCStri(command),
+                       parameters->max_position);
                printParameters(parameters);
-               printf(", \"%s\"", striAsUnquotedCStri(redirectStdin));
+               printf("), \"%s\"", striAsUnquotedCStri(redirectStdin));
                printf(", \"%s\"", striAsUnquotedCStri(redirectStdout));
                printf(", \"%s\", *) failed:\n",
                       striAsUnquotedCStri(redirectStderr));
@@ -4824,10 +4838,12 @@ intType cmdShellExecute (const const_striType command,
                           os_command););
         returnCode = (intType) os_system(os_command);
         logErrorIfTrue(returnCode != 0,
-                       printf("cmdShellExecute(\"%s\"",
-                              striAsUnquotedCStri(command));
+                       printf("cmdShellExecute(\"%s\""
+                              ", array[" FMT_D "]: (",
+                              striAsUnquotedCStri(command),
+                              parameters->max_position);
                        printParameters(parameters);
-                       printf(", \"%s\"",
+                       printf("), \"%s\"",
                               striAsUnquotedCStri(redirectStdin));
                        printf(", \"%s\"",
                               striAsUnquotedCStri(redirectStdout));
