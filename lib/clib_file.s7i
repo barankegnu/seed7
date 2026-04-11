@@ -37,7 +37,7 @@
 const type: clib_file is newtype;
 
 
-IN_PARAM_IS_VALUE(clib_file);
+IN_PARAM_IS_REFERENCE(clib_file);
 
 const creator: (ref clib_file: dest) ::= (in clib_file: source)      is action "FIL_CREATE";
 const destroyer: destroy (ref clib_file: aValue)                     is action "FIL_DESTR";
@@ -297,4 +297,4 @@ const proc: seek (in clib_file: aFile, in integer: position)         is action "
 const func integer: tell (in clib_file: aFile)                       is action "FIL_TELL";
 
 
-const func string: literal (in clib_file: aFile)                     is action "FIL_LIT";
+const func string: literal (in clib_file: aFile)                     is action "FIL_LITERAL";

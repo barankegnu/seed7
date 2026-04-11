@@ -1584,11 +1584,10 @@ boolType gkbInputReady (void)
     BOOL bRet;
     MSG msg;
     MSG mouseMoveMsg;
-    boolType result;
+    boolType inputReady = FALSE;
 
   /* gkbInputReady */
     logFunction(printf("gkbInputReady\n"););
-    result = FALSE;
     msg_present = PeekMessageW(&msg, NULL, 0, 0, PM_NOREMOVE);
     while (msg_present) {
       /* printf("gkbInputReady: message=%d %lu, %d, %x\n", msg.message, msg.hwnd, msg.wParam, msg.lParam); */
@@ -1625,7 +1624,7 @@ boolType gkbInputReady (void)
                   msg_present = PeekMessageW(&msg, NULL, 0, 0, PM_NOREMOVE);
                 } else if (deadKeyActive == msg.wParam) {
                   msg_present = 0;
-                  result = TRUE;
+                  inputReady = TRUE;
                 } else {
                   deadKeyActive = msg.wParam;
                   bRet = GetMessageW(&msg, NULL, 0, 0);
@@ -1634,7 +1633,7 @@ boolType gkbInputReady (void)
                   } /* if */
                   PostMessageW(msg.hwnd, WM_KEYDOWN, VK_SPACE, msg.lParam);
                   msg_present = 0;
-                  result = TRUE;
+                  inputReady = TRUE;
                 } /* if */
               } else {
                 bRet = GetMessageW(&msg, NULL, 0, 0);
@@ -1646,11 +1645,11 @@ boolType gkbInputReady (void)
                 } /* if */
                 PostMessageW(msg.hwnd, WM_KEYDOWN, VK_SPACE, msg.lParam);
                 msg_present = 0;
-                result = TRUE;
+                inputReady = TRUE;
               } /* if */
             } else {
               msg_present = 0;
-              result = TRUE;
+              inputReady = TRUE;
             } /* if */
           } /* if */
           break;
@@ -1662,7 +1661,7 @@ boolType gkbInputReady (void)
                             ", wParam=" FMT_X64 ", lParam=" FMT_X_MEM "\n",
                             (memSizeType) msg.hwnd, msg.wParam, msg.lParam););
           msg_present = 0;
-          result = TRUE;
+          inputReady = TRUE;
           break;
         case WM_MOUSEWHEEL:
           traceEvent(printf("gkbInputReady: WM_MOUSEWHEEL hwnd=" FMT_U_MEM
@@ -1679,7 +1678,7 @@ boolType gkbInputReady (void)
             if (point.x >= 0 && point.x < drwWidth(win) &&
                 point.y >= 0 && point.y < drwHeight(win)) {
               msg_present = 0;
-              result = TRUE;
+              inputReady = TRUE;
             } else {
               bRet = GetMessageW(&msg, NULL, 0, 0);
               if (bRet == 0 || bRet == -1) {
@@ -1709,7 +1708,7 @@ boolType gkbInputReady (void)
               os_exit(0);
             } else {
               msg_present = 0;
-              result = TRUE;
+              inputReady = TRUE;
             } /* if */
           } else {
             bRet = GetMessageW(&msg, NULL, 0, 0);
@@ -1743,7 +1742,7 @@ boolType gkbInputReady (void)
           if ((msg.wParam & 0xfff0) == SC_CLOSE && IsWindow(msg.hwnd)) {
             /* printf("SC_CLOSE\n"); */
             msg_present = 0;
-            result = TRUE;
+            inputReady = TRUE;
           } else {
             bRet = GetMessageW(&msg, NULL, 0, 0);
             if (bRet == 0 || bRet == -1) {
@@ -1837,14 +1836,14 @@ boolType gkbInputReady (void)
                             ", wParam=" FMT_X64 ", lParam=" FMT_X_MEM "\n",
                             (memSizeType) msg.hwnd, msg.wParam, msg.lParam););
           msg_present = 0;
-          result = TRUE;
+          inputReady = TRUE;
           break;
         case WM_USER:
           traceEvent(printf("gkbInputReady: WM_USER hwnd=" FMT_U_MEM
                             ", wParam=" FMT_U_MEM ", lParam=" FMT_X_MEM "\n",
                             (memSizeType) msg.hwnd, msg.wParam, msg.lParam););
           msg_present = 0;
-          result = TRUE;
+          inputReady = TRUE;
           break;
         default:
           traceEvent(printf("gkbInputReady: message=%d, hwnd=" FMT_U_MEM
@@ -1862,8 +1861,8 @@ boolType gkbInputReady (void)
           break;
       } /* switch */
     } /* while */
-    logFunction(printf("gkbInputReady --> %d\n", result););
-    return result;
+    logFunction(printf("gkbInputReady --> %d\n", inputReady););
+    return inputReady;
   } /* gkbInputReady */
 
 

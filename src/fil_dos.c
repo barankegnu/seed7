@@ -155,7 +155,7 @@ boolType filInputReady (fileType inFile)
 
 
 
-void filPipe (fileType *inFile, fileType *outFile)
+void filPipe (fileType *const inFile, fileType *const outFile)
 
   { /* filPipe */
     *inFile = NULL;

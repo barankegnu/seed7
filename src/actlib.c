@@ -53,6 +53,34 @@
 
 
 /**
+ *  Compare two action entries.
+ *  @return -1, 0 or 1 if the first argument is considered to be
+ *          respectively less than, equal to, or greater than the
+ *          second.
+ */
+objectType ace_cmp (listType arguments)
+
+  {
+    memSizeType ref1;
+    memSizeType ref2;
+    intType signumValue;
+
+  /* ace_cmp */
+    isit_actentry(arg_1(arguments));
+    isit_actentry(arg_2(arguments));
+    ref1 = (memSizeType) take_actentry(arg_1(arguments));
+    ref2 = (memSizeType) take_actentry(arg_2(arguments));
+    if (ref1 < ref2) {
+      signumValue = -1;
+    } else {
+      signumValue = ref1 > ref2;
+    } /* if */
+    return bld_int_temp(signumValue);
+  } /* ace_cmp */
+
+
+
+/**
  *  Assign source/arg_3 to dest/arg_1.
  *  A copy function assumes that dest/arg_1 contains a legal value.
  */
@@ -99,6 +127,31 @@ objectType ace_create (listType arguments)
 
 
 /**
+ *  Check if two action entries are equal.
+ *  @return TRUE if both actions are equal,
+ *          FALSE otherwise.
+ */
+objectType ace_eq (listType arguments)
+
+  {
+    const_actEntryType actEntry1;
+    const_actEntryType actEntry2;
+
+  /* ace_eq */
+    isit_actentry(arg_1(arguments));
+    isit_actentry(arg_3(arguments));
+    actEntry1 = take_actentry(arg_1(arguments));
+    actEntry2 = take_actentry(arg_3(arguments));
+    if (actEntry1 == actEntry2) {
+      return SYS_TRUE_OBJECT;
+    } else {
+      return SYS_FALSE_OBJECT;
+    } /* if */
+  } /* ace_eq */
+
+
+
+/**
  *  Convert a string to an action.
  *  @param actionName/arg_2 Name of the action to be converted.
  *  @return an action which corresponds to the given string.
@@ -128,27 +181,26 @@ objectType ace_gen (listType arguments)
 
 
 /**
- *  Check if two action entries are equal.
- *  @return TRUE if both actions are equal,
- *          FALSE otherwise.
+ *  Compute the hash value of an action entry.
+ *  @return the hash value.
  */
-objectType ace_eq (listType arguments)
+objectType ace_hashcode (listType arguments)
 
   {
-    const_actEntryType actEntry1;
-    const_actEntryType actEntry2;
+    const_actEntryType actEntry;
+    intType hashCode;
 
-  /* ace_eq */
+  /* ace_hashcode */
     isit_actentry(arg_1(arguments));
-    isit_actentry(arg_3(arguments));
-    actEntry1 = take_actentry(arg_1(arguments));
-    actEntry2 = take_actentry(arg_3(arguments));
-    if (actEntry1 == actEntry2) {
-      return SYS_TRUE_OBJECT;
+    actEntry = take_actentry(arg_1(arguments));
+    if (unlikely(actEntry == NULL)) {
+      logError(printf("ace_hashcode: NULL action entry.\n"););
+      return raise_exception(SYS_RNG_EXCEPTION);
     } else {
-      return SYS_FALSE_OBJECT;
+      hashCode = actEntry - actTable.table;
+      return bld_int_temp(hashCode);
     } /* if */
-  } /* ace_eq */
+  } /* ace_hashcode */
 
 
 

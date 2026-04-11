@@ -64,7 +64,7 @@ const ACTION: DRW_PPOINT                    is action "DRW_PPOINT";
 const ACTION: DRW_PRECT                     is action "DRW_PRECT";
 const ACTION: DRW_PUT                       is action "DRW_PUT";
 const ACTION: DRW_PUT_SCALED                is action "DRW_PUT_SCALED";
-const ACTION: DRW_RGBCOL                    is action "DRW_RGBCOL";
+const ACTION: DRW_RGB_COLOR                 is action "DRW_RGB_COLOR";
 const ACTION: DRW_SCREEN_HEIGHT             is action "DRW_SCREEN_HEIGHT";
 const ACTION: DRW_SCREEN_WIDTH              is action "DRW_SCREEN_WIDTH";
 const ACTION: DRW_SET_CONTENT               is action "DRW_SET_CONTENT";
@@ -970,7 +970,7 @@ const proc: process (DRW_PUT_SCALED, in reference: function,
   end func;
 
 
-const proc: process (DRW_RGBCOL, in reference: function,
+const proc: process (DRW_RGB_COLOR, in reference: function,
     in ref_list: params, inout expr_type: c_expr) is func
 
   begin

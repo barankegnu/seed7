@@ -572,6 +572,8 @@ const func boolean: identical_values (in reference: object1, in reference: objec
         isIdentical := getValue(object1, reference) = getValue(object2, reference);
       when {FILEOBJECT}:
         isIdentical := getValue(object1, clib_file) = getValue(object2, clib_file);
+      when {SOCKETOBJECT}:
+        isIdentical := getValue(object1, PRIMITIVE_SOCKET) = getValue(object2, PRIMITIVE_SOCKET);
       when {POINTLISTOBJECT}:
         isIdentical := getValue(object1, pointList) = getValue(object2, pointList);
       when {CONSTENUMOBJECT, VARENUMOBJECT}:
@@ -881,7 +883,7 @@ const proc: process_local_declaration (in reference: current_object, in var refe
       create_name(current_object, c_declaration.temp_frees);
       c_declaration.temp_frees &:= ");\n";
     elsif valueCategory = SOCKETOBJECT then
-      c_declaration.temp_decls &:= "=-1";
+      c_declaration.temp_decls &:= "=&emptySocketRecord";
     elsif valueCategory = POLLOBJECT then
       c_declaration.temp_assigns &:= diagnosticLine(current_object);
       c_declaration.temp_assigns &:= "o_";
@@ -1042,8 +1044,15 @@ const proc: process_local_declaration (in reference: current_object, in var refe
       c_expr.temp_to_null &:= c_value.temp_to_null;
       function_declared @:= [object_value] TRUE;
       function_var_declared @:= [current_object] TRUE;
-    elsif valueCategory = ACTOBJECT then
-      c_declaration.temp_decls &:= "=NULL";
+    elsif valueCategory = ACTENTRYOBJECT then
+      c_declaration.temp_assigns &:= diagnosticLine(current_object);
+      c_declaration.temp_assigns &:= "o_";
+      create_name(current_object, c_declaration.temp_assigns);
+      c_declaration.temp_assigns &:= "=aceIConv(";
+      c_declaration.temp_assigns &:= integerLiteral(ord(getValue(object_value, ACTION)));
+      c_declaration.temp_assigns &:= " /* ";
+      c_declaration.temp_assigns &:= str(getValue(object_value, ACTION));
+      c_declaration.temp_assigns &:= " */);\n";
     else
       c_declaration.temp_decls &:= "/* ";
       c_declaration.temp_decls &:= str(valueCategory);
@@ -1665,6 +1674,7 @@ const proc: process_call (in reference: current_expression, inout expr_type: c_e
           functionCategory = STRUCTELEMOBJECT or
           functionCategory = INTERFACEOBJECT or
           functionCategory = FILEOBJECT or
+          functionCategory = SOCKETOBJECT or
           functionCategory = POLLOBJECT or
           functionCategory = WINOBJECT or
           functionCategory = POINTLISTOBJECT or
@@ -1673,6 +1683,7 @@ const proc: process_call (in reference: current_expression, inout expr_type: c_e
           functionCategory = DATABASEOBJECT or
           functionCategory = SQLSTMTOBJECT or
           functionCategory = ENUMLITERALOBJECT or
+          functionCategory = ACTENTRYOBJECT or
           functionCategory = TYPEOBJECT then
       process_expr(function, c_expr);
     elsif functionCategory = REFOBJECT or
@@ -1814,12 +1825,6 @@ const proc: process_expr (in var reference: current_expression, inout expr_type:
           c_expr.expr &:= ";\n";
         end if;
       end if;
-    elsif exprCategory = ACTOBJECT then
-      global_c_expr.expr &:= "objRefType ";
-      global_c_expr.expr &:= lower(str(getValue(current_expression, ACTION)));
-      global_c_expr.expr &:= " (listType arguments);\n";
-      c_expr.expr &:= "&";
-      c_expr.expr &:= lower(str(getValue(current_expression, ACTION)));
     elsif exprCategory = LOCALVOBJECT then
       if current_expression in funcparam_data then
         c_expr.expr &:= funcparam_data[current_expression];
@@ -2101,7 +2106,9 @@ const proc: process_expr (in var reference: current_expression, inout expr_type:
       else
         c_expr.expr &:= "aceIConv(";
         c_expr.expr &:= integerLiteral(ord(getValue(current_expression, ACTION)));
-        c_expr.expr &:= ")";
+        c_expr.expr &:= " /* ";
+        c_expr.expr &:= str(getValue(current_expression, ACTION));
+        c_expr.expr &:= " */)";
       end if;
     elsif exprCategory = SYMBOLOBJECT then
       c_expr.expr &:= "/* SYMBOLOBJECT ";
@@ -3115,7 +3122,15 @@ const proc: action_address (in reference: function, inout expr_type: c_expr) is 
   begin
     current_action := getValue(function, ACTION);
     action_name := str(current_action);
-    if action_name = "ARR_CPY" then
+    if action_name = "ACE_CMP" then
+      c_expr.expr &:= "&ptrCmpGeneric";
+    elsif action_name = "ACE_CPY" then
+      c_expr.expr &:= "&genericCpy";
+    elsif action_name = "ACE_CREATE" then
+      c_expr.expr &:= "&genericCreate";
+    elsif action_name = "ACE_HASHCODE" then
+      c_expr.expr &:= "&aceHashCode";
+    elsif action_name = "ARR_CPY" then
       object_type := getType(formalParams(function)[1]);
       process_generic_cpy_declaration(object_type, global_c_expr);
       c_expr.expr &:= "&generic_cpy_";
@@ -3253,17 +3268,13 @@ const proc: action_address (in reference: function, inout expr_type: c_expr) is 
       c_expr.expr &:= "&prgDestrGeneric";
     elsif action_name = "PRG_HASHCODE" then
       c_expr.expr &:= "&ptrHashCodeGeneric";
-    elsif action_name = "REF_CMP" or
-          action_name = "SEL_CMP" then
+    elsif action_name = "REF_CMP" then
       c_expr.expr &:= "&ptrCmpGeneric";
-    elsif action_name = "REF_CPY" or
-          action_name = "SEL_CPY" then
+    elsif action_name = "REF_CPY" then
       c_expr.expr &:= "&ptrCpyGeneric";
-    elsif action_name = "REF_CREATE" or
-          action_name = "SEL_CREATE" then
+    elsif action_name = "REF_CREATE" then
       c_expr.expr &:= "&ptrCreateGeneric";
-    elsif action_name = "REF_HASHCODE" or
-          action_name = "SEL_HASHCODE" then
+    elsif action_name = "REF_HASHCODE" then
       c_expr.expr &:= "&ptrHashCodeGeneric";
     elsif action_name = "RFL_CMP" then
       c_expr.expr &:= "&rflCmpGeneric";
@@ -3289,6 +3300,14 @@ const proc: action_address (in reference: function, inout expr_type: c_expr) is 
       process_generic_destr_declaration(object_type, global_c_expr);
       c_expr.expr &:= "&generic_destr_";
       c_expr.expr &:= str(typeNumber(object_type));
+    elsif action_name = "SEL_CMP" then
+      c_expr.expr &:= "&ptrCmpGeneric";
+    elsif action_name = "SEL_CPY" then
+      c_expr.expr &:= "&genericCpy";
+    elsif action_name = "SEL_CREATE" then
+      c_expr.expr &:= "&genericCreate";
+    elsif action_name = "SEL_HASHCODE" then
+      c_expr.expr &:= "&ptrHashCodeGeneric";
     elsif action_name = "SET_CMP" then
       c_expr.expr &:= "&setCmpGeneric";
     elsif action_name = "SET_CPY" then
@@ -3299,6 +3318,12 @@ const proc: action_address (in reference: function, inout expr_type: c_expr) is 
       c_expr.expr &:= "&setDestrGeneric";
     elsif action_name = "SET_HASHCODE" then
       c_expr.expr &:= "&setHashCodeGeneric";
+    elsif action_name = "SOC_CPY" then
+      c_expr.expr &:= "&socCpyGeneric";
+    elsif action_name = "SOC_CREATE" then
+      c_expr.expr &:= "&socCreateGeneric";
+    elsif action_name = "SOC_DESTR" then
+      c_expr.expr &:= "&socDestrGeneric";
     elsif action_name = "SQL_CMP_DB" then
       c_expr.expr &:= "&ptrCmpGeneric";
     elsif action_name = "SQL_CPY_DB" then
@@ -3523,7 +3548,7 @@ const proc: process_socket_declaration (in reference: current_object,
   begin
     c_expr.expr &:= "socketType o_";
     create_name(current_object, c_expr.expr);
-    c_expr.expr &:= " = (socketType) -1;\n\n";
+    c_expr.expr &:= " = &emptySocketRecord;\n\n";
     count_declarations(c_expr);
   end func;
 
@@ -4334,7 +4359,7 @@ const func boolean: process_dynamic_param_struct_elem (in reference: current_obj
     c_switch.expr &:= str(numOfElementNameTable);
     c_switch.expr &:= "], name_";
     c_switch.expr &:= str(symbolTempNum);
-    c_switch.expr &:= ".value.genericValue, ustriHash(name_";
+    c_switch.expr &:= ".value.genericValue, ustriHashCode(name_";
     c_switch.expr &:= str(symbolTempNum);
     c_switch.expr &:= ".value.ustriValue), (compareType)(&ustriCmpGeneric))) {\n";
     elements := structSymbols(prog);
@@ -5093,8 +5118,8 @@ const proc: process_action_declaration (in reference: current_object,
       if action_name = "PRC_DYNAMIC" then
         process_dynamic_declaration(current_object, c_expr);
         count_declarations(c_expr);
-      elsif action_name = "ACT_CPY" then
-        defineParam1TypeCategory(current_object, ACTOBJECT);
+      elsif action_name = "ACE_CPY" then
+        defineParam1TypeCategory(current_object, ACTENTRYOBJECT);
         count_declarations(c_expr);
       elsif action_name = "ARR_CPY" then
         process_arr_cpy_declaration(current_object);
@@ -5611,6 +5636,7 @@ const proc: write_file_head is func
     writeln(c_prog, "typedef uintType bitSetType;");
     writeln(c_prog, "typedef uint" <& ccConf.POINTER_SIZE <& "Type memSizeType;");
     writeln(c_prog, "typedef FILE *cFileType;");
+    writeln(c_prog, "typedef int socketNumberType;");
     writeln(c_prog, "typedef char *cstriType;");
     writeln(c_prog, "typedef const char *const_cstriType;");
     writeln(c_prog, "typedef unsigned char *ustriType;");
@@ -5644,6 +5670,11 @@ const proc: write_file_head is func
                     \  uintType usage_count;\n\
                     \} *fileType;");
     writeln(c_prog, "typedef const struct fileStruct  *const_fileType;");
+    writeln(c_prog, "typedef struct socketStruct {\n\
+                    \  socketNumberType socketNumber;\n\
+                    \  uintType usage_count;\n\
+                    \} *socketType;");
+    writeln(c_prog, "typedef const struct socketStruct  *const_socketType;");
     writeln(c_prog, "typedef struct setStruct {\n\
                     \  intType min_position;\n\
                     \  intType max_position;\n\
@@ -5708,8 +5739,7 @@ const proc: write_file_head is func
                     \  actType action;\n\
                     \} actEntryRecord;\n\
                     \typedef actEntryRecord *actEntryType;\n\
-                    \typedef const actEntryRecord *const_actEntryType;\n\
-                    \typedef int socketType;");
+                    \typedef const actEntryRecord *const_actEntryType;");
     writeln(c_prog, "typedef uint" <& ccConf.GENERIC_SIZE <& "Type genericType;");
     writeln(c_prog, "typedef union {\n\
                     \  genericType   genericValue;\n\
@@ -5948,6 +5978,7 @@ const proc: write_file_head is func
     writeln(c_prog, "extern struct fileStruct stdinFileRecord;");
     writeln(c_prog, "extern struct fileStruct stdoutFileRecord;");
     writeln(c_prog, "extern struct fileStruct stderrFileRecord;");
+    writeln(c_prog, "extern struct socketStruct emptySocketRecord;");
     writeln(c_prog, "typedef int errInfoType;");
     writeln(c_prog, "#define OKAY_NO_ERROR   0\n\
                     \#define MEMORY_ERROR    1\n\
@@ -6008,7 +6039,7 @@ const proc: write_file_head is func
     writeln(c_prog, "extern int error_line;");
     writeln(c_prog, "intType ustriCmpGeneric (const genericType value1, const genericType value2);");
     writeln(c_prog, "genericType ustriCreateGeneric (const genericType source);");
-    writeln(c_prog, "intType ustriHash (const const_ustriType stri);");
+    writeln(c_prog, "intType ustriHashCode (const const_ustriType stri);");
     if config.profile_function then
       writeln(c_prog, "intType timMicroSec (void);");
       writeln(c_prog, "static unsigned int profile_size;");
@@ -6366,8 +6397,7 @@ const proc: init_const_value (in reference: current_object, inout expr_type: c_e
       c_expr.expr &:= lower(literal(getValue(current_object, clib_file)));
       c_expr.expr &:= "FileRecord";
     elsif objectCategory = SOCKETOBJECT then
-      c_expr.expr &:= ".value.intValue=";
-      c_expr.expr &:= "-1";
+      c_expr.expr &:= ".value.socketValue=&emptySocketRecord";
     elsif objectCategory = POLLOBJECT then
       c_expr.expr &:= ".value.pollValue=";
       process_pollData_literal(getValue(current_object, pollData), c_expr);
@@ -6424,6 +6454,12 @@ const proc: init_const_value (in reference: current_object, inout expr_type: c_e
       c_expr.expr &:= ".value.databaseValue=NULL";
     elsif objectCategory = SQLSTMTOBJECT then
       c_expr.expr &:= ".value.sqlStmtValue=NULL";
+    elsif objectCategory = ACTENTRYOBJECT then
+      c_expr.expr &:= ".value.actEntryValue=aceIConv(";
+      c_expr.expr &:= integerLiteral(ord(getValue(current_object, ACTION)));
+      c_expr.expr &:= " /* ";
+      c_expr.expr &:= str(getValue(current_object, ACTION));
+      c_expr.expr &:= " */)";
     else
       c_expr.expr &:= "/* ";
       c_expr.expr &:= str(objectCategory);
@@ -6949,7 +6985,11 @@ const proc: write_str_table (in stri_index_hash: stri_index,
           c_expr.expr &:= ",";
         end if;
         if stri = "" then
-          c_expr.expr &:= "striChars";
+          if length(constTable.stri_const) > 1 then
+            c_expr.expr &:= "striChars";
+          else
+            c_expr.expr &:= "NULL";
+          end if;
         else
           c_expr.expr &:= "&striChars[";
           c_expr.expr &:= str(pred(stringPosition[number]));
@@ -7200,7 +7240,11 @@ const proc: write_bst_table (in bstri_index_hash: bstri_index,
         c_expr.expr &:= str(length(stri));
         c_expr.expr &:= ",";
         if stri = "" then
-          c_expr.expr &:= "bstriChars";
+          if length(constTable.bstri_const) > 1 then
+            c_expr.expr &:= "bstriChars";
+          else
+            c_expr.expr &:= "NULL";
+          end if;
         else
           c_expr.expr &:= "&bstriChars[";
           c_expr.expr &:= str(pred(stringPosition[number]));
@@ -8571,25 +8615,18 @@ const proc: execProgramScript (in string: command, in array string: parameters,
     in string: errorFile) is func
 
   local
-    var array string: redirection is 0 times "";
+    var string: redirectStdout is "";
+    var string: redirectStderr is "";
     var integer: shellResult is 0;
   begin
     logProgram(command, parameters, errorFile);
     case ccConf.CC_ERROR_FILEDES of
       when {1}:
-        redirection &:= ccConf.REDIRECT_FILEDES_1 & toShellPath(errorFile);
-        redirection &:= ccConf.REDIRECT_FILEDES_2 & ccConf.NULL_DEVICE;
+        redirectStdout := errorFile;
       when {2}:
-        redirection &:= ccConf.REDIRECT_FILEDES_2 & toShellPath(errorFile);
-        redirection &:= ccConf.REDIRECT_FILEDES_1 & ccConf.NULL_DEVICE;
+        redirectStderr := errorFile;
     end case;
-    if length(redirection) = 0 then
-      # An CC_ERROR_FILEDES of zero means: Do not redirect.
-      shellResult := shell(command, shellParameters(parameters));
-    else
-      shellResult := shell(command, shellParameters(parameters) <& " " <&
-                           join(redirection, " "));
-    end if;
+    shellResult := shell(command, parameters, "", redirectStdout, redirectStderr);
     if shellResult <> 0 then
       writeln("*** The shell command returned " <& shellResult);
     end if;

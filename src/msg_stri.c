@@ -583,8 +583,12 @@ void appendRealValue (striType *const msg, const const_objectType anyobject)
         } /* if */
         break;
       case SOCKETOBJECT:
-        appendCStri(msg, "socket ");
-        appendInt(msg, (intType) anyobject->value.socketValue);
+        if (anyobject->value.socketValue == NULL) {
+          appendCStri(msg, " *NULL_SOCKET* ");
+        } else {
+          appendCStri(msg, "socket ");
+          appendInt(msg, (intType) anyobject->value.socketValue->socketNumber);
+        } /* if */
         break;
 #if WITH_FLOAT
       case FLOATOBJECT:

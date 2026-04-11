@@ -133,7 +133,6 @@ const func string: raw_type_name (in type: object_type) is func
         when {REFLISTOBJECT}:    typeName := "listType";
         when {TYPEOBJECT}:       typeName := "typeType";
         when {ACTENTRYOBJECT}:   typeName := "const_actEntryType";
-        when {ACTOBJECT}:        typeName := "actType";
         otherwise:
           typeName := "t_";
           typeName &:= str(typeNumber(object_type));
@@ -242,7 +241,6 @@ const func string: raw_type_value (in type: object_type) is func
         when {REFLISTOBJECT}:    valueName := "listValue";
         when {TYPEOBJECT}:       valueName := "typeValue";
         when {ACTENTRYOBJECT}:   valueName := "actEntryValue";
-        when {ACTOBJECT}:        valueName := "actValue";
         otherwise:               valueName := "genericValue";
        end case;
     else
@@ -265,10 +263,11 @@ const func boolean: valueIsAtHeap (in type: aType) is func
     var boolean: isAtHeap is FALSE;
   local
     const set of category: heapCategories is {
-        BIGINTOBJECT, STRIOBJECT, BSTRIOBJECT, FILEOBJECT, WINOBJECT,
-        POINTLISTOBJECT, PROCESSOBJECT, PROGOBJECT, DATABASEOBJECT,
-        SQLSTMTOBJECT, SETOBJECT, ARRAYOBJECT, STRUCTOBJECT, HASHOBJECT,
-        INTERFACEOBJECT, REFLISTOBJECT};
+        BIGINTOBJECT, STRIOBJECT, BSTRIOBJECT, FILEOBJECT,
+        SOCKETOBJECT, WINOBJECT, POINTLISTOBJECT, PROCESSOBJECT,
+        PROGOBJECT, DATABASEOBJECT, SQLSTMTOBJECT, SETOBJECT,
+        ARRAYOBJECT, STRUCTOBJECT, HASHOBJECT, INTERFACEOBJECT,
+        REFLISTOBJECT};
   begin
     if aType in typeData.typeCategory and
         typeData.typeCategory[aType] in heapCategories then

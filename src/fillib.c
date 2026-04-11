@@ -36,10 +36,12 @@
 
 #include "common.h"
 #include "data.h"
+#include "data_rtl.h"
 #include "os_decls.h"
 #include "heaputl.h"
 #include "syvarutl.h"
 #include "striutl.h"
+#include "arrutl.h"
 #include "objutl.h"
 #include "traceutl.h"
 #include "runerr.h"
@@ -453,13 +455,13 @@ objectType fil_line_read (listType arguments)
 
 
 
-objectType fil_lit (listType arguments)
+objectType fil_literal (listType arguments)
 
-  { /* fil_lit */
+  { /* fil_literal */
     isit_file(arg_1(arguments));
     return bld_stri_temp(
-        filLit(take_file(arg_1(arguments))));
-  } /* fil_lit */
+        filLiteral(take_file(arg_1(arguments))));
+  } /* fil_literal */
 
 
 
@@ -573,21 +575,6 @@ objectType fil_out (listType arguments)
 
 
 
-/**
- *  Wait for the process associated with aPipe/arg_1 to terminate.
- *  @param aPipe Pipe to be closed (created by 'fil_popen').
- *  @exception FILE_ERROR A system function returned an error.
- */
-objectType fil_pclose (listType arguments)
-
-  { /* fil_pclose */
-    isit_file(arg_1(arguments));
-    filPclose(take_file(arg_1(arguments)));
-    return SYS_EMPTY_OBJECT;
-  } /* fil_pclose */
-
-
-
 objectType fil_pipe (listType arguments)
 
   {
@@ -630,13 +617,32 @@ objectType fil_pipe (listType arguments)
  */
 objectType fil_popen (listType arguments)
 
-  { /* fil_popen */
+  {
+    rtlArrayType parameters;
+    fileType pipeOpened;
+
+  /* fil_popen */
     isit_stri(arg_1(arguments));
-    isit_stri(arg_2(arguments));
+    isit_array(arg_2(arguments));
     isit_stri(arg_3(arguments));
-    return bld_file_temp(
-        filPopen(take_stri(arg_1(arguments)), take_stri(arg_2(arguments)),
-                 take_stri(arg_3(arguments))));
+    logFunction(printf("fil_popen(\"%s\", array[" FMT_D "]",
+                       striAsUnquotedCStri(take_stri(arg_1(arguments))),
+                       take_array(arg_2(arguments))->max_position);
+                printf(", \"%s\")\n",
+                       striAsUnquotedCStri(take_stri(arg_3(arguments)))););
+    parameters = gen_rtl_array(take_array(arg_2(arguments)));
+    if (parameters == NULL) {
+      return raise_exception(SYS_MEM_EXCEPTION);
+    } else {
+      pipeOpened = filPopen(take_stri(arg_1(arguments)), parameters,
+                            take_stri(arg_3(arguments)));
+      FREE_RTL_ARRAY(parameters, arraySize(parameters));
+    } /* if */
+    logFunction(printf("fil_popen --> %s%d\n",
+                       pipeOpened == NULL ? "NULL " : "",
+                       pipeOpened != NULL ?
+                           safe_fileno(pipeOpened->cFile) : 0););
+    return bld_file_temp(pipeOpened);
   } /* fil_popen */
 
 

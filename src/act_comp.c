@@ -49,9 +49,9 @@
 
 
 /**
- *  Convert a string to an action.
+ *  Convert a string to an action entry.
  *  @param actionName Name of the action to be converted.
- *  @return an action which corresponds to the given string.
+ *  @return an action entry which corresponds to the given string.
  *  @exception RANGE_ERROR No such action exists.
  */
 const_actEntryType aceGen (const const_striType actionName)
@@ -76,9 +76,34 @@ const_actEntryType aceGen (const const_striType actionName)
 
 
 /**
- *  Convert an integer number to an action.
+ *  Compute the hash value of an action entry.
+ *  @return the hash value.
+ */
+intType aceHashCode (const_actEntryType actEntry)
+
+  {
+    intType hashCode;
+
+  /* aceHashCode */
+    logFunction(printf("aceHashCode(" FMT_U_MEM ")\n",
+                       (memSizeType) actEntry););
+    if (unlikely(actEntry == NULL)) {
+      logError(printf("aceHashCode: NULL action entry.\n"););
+      raise_error(RANGE_ERROR);
+      hashCode = 0;
+    } else {
+      hashCode = actEntry - actTable.table;
+    } /* if */
+    logFunction(printf("aceHashCode --> " FMT_D "\n", hashCode););
+    return hashCode;
+  } /* aceHashCode */
+
+
+
+/**
+ *  Convert an integer number to an action entry.
  *  @param ordinal Number to be converted.
- *  @return an action which corresponds to the given integer.
+ *  @return an action entry which corresponds to the given integer.
  *  @exception RANGE_ERROR Number not in allowed range.
  */
 const_actEntryType aceIConv (intType ordinal)

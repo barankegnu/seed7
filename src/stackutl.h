@@ -29,7 +29,6 @@
 /*                                                                  */
 /********************************************************************/
 
-#define CATCH_STACK_INCREMENT 128
 typedef longjmpPosition catch_type;
 
 #ifdef DO_INIT

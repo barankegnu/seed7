@@ -50,7 +50,6 @@
 #include "common.h"
 #include "os_decls.h"
 #include "striutl.h"
-#include "fil_rtl.h"
 #include "tim_drv.h"
 
 #include "stat_drv.h"

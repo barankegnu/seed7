@@ -131,38 +131,50 @@ static const_actEntryType searchAction (cstriType actionName)
 
   /* searchAction */
     logFunction(printf("searchAction(\"%s\")\n", actionName););
+    if (likely(actTable.table != NULL)) {
 #if USE_BSEARCH
-    if ((found = (actEntryType) bsearch(actionName, &actTable.table[1],
-        actTable.size - 1, sizeof(actEntryRecord), actTableCmp)) != NULL) {
-      actionNumber = (unsigned int) (found - &actTable.table[0]);
-    } else {
-      actionNumber = 0;
-    } /* if */
-#else
-    actionNumber = 0;
-    lower = 0;
-    upper = actTable.size;
-    while (lower + 1 < upper) {
-      middle = (lower + upper) >> 1;
-      logMessage(printf("%u %u %u >%s< >%s<\n",
-                        lower, middle, upper,
-                        actTable.table[middle].name, actionName););
-      if ((comparison = strcmp(actTable.table[middle].name, actionName)) < 0) {
-        lower = middle;
-      } else if (comparison == 0) {
-        lower = upper - 1;
-        actionNumber = middle;
+      if ((found = (actEntryType) bsearch(actionName, &actTable.table[1],
+          actTable.size - 1, sizeof(actEntryRecord), actTableCmp)) != NULL) {
+        actionNumber = (unsigned int) (found - &actTable.table[0]);
       } else {
-        upper = middle;
+        actionNumber = 0;
       } /* if */
-    } /* while */
+#else
+      actionNumber = 0;
+      lower = 0;
+      upper = actTable.size;
+      while (lower + 1 < upper) {
+        middle = (lower + upper) >> 1;
+        logMessage(printf("%u %u %u >%s< >%s<\n",
+                          lower, middle, upper,
+                          actTable.table[middle].name, actionName););
+        if ((comparison = strcmp(actTable.table[middle].name, actionName)) < 0) {
+          lower = middle;
+        } else if (comparison == 0) {
+          lower = upper - 1;
+          actionNumber = middle;
+        } else {
+          upper = middle;
+        } /* if */
+      } /* while */
 #endif
-    logMessage(printf("action number: %u\n", actionNumber););
-    if (actTable.table != NULL && actionNumber != 0) {
+      logMessage(printf("action number: %u\n", actionNumber););
       logMessage(printf("action name: \"%s\"\n",
                         actTable.table[actionNumber].name););
-      actEntryFound = &actTable.table[actionNumber];
+      if (likely(actionNumber != 0)) {
+        actEntryFound = &actTable.table[actionNumber];
+      } else if (strcmp(actTable.table[0].name, actionName) == 0) {
+        actEntryFound = &actTable.table[0];
+      } else {
+        logError(printf("searchAction(\"%s\"): "
+                        "No such action exists.\n",
+                        actionName););
+        actEntryFound = NULL;
+      } /* if */
     } else {
+      logError(printf("searchAction(\"%s\"): "
+                      "actTable.table does not exist.\n",
+                      actionName););
       actEntryFound = NULL;
     } /* if */
     logFunction(printf("searchAction --> " FMT_U_MEM "\n",

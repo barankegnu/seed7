@@ -280,5 +280,5 @@ void setEmulatedCwd (os_striType os_path, errInfoType *err_info);
 os_striType cp_to_os_path (const_striType std_path, int *path_info,
     errInfoType *err_info);
 os_striType temp_name_in_dir (const const_os_striType path);
-os_striType cp_to_command (const const_striType command,
-    const const_striType parameters, errInfoType *err_info);
+striType escapeCommand (const const_striType stri, errInfoType *err_info);
+striType escapeParameter (const const_striType stri, errInfoType *err_info);
