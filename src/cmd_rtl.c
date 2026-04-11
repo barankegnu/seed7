@@ -348,7 +348,7 @@ static void printParameters (const const_rtlArrayType parameters)
   } /* printParameters */
 
 #else
-#define printParameters(parameters) printf(" *not shown* ");
+#define printParameters(parameters) printf(" *not shown* ")
 #endif
 
 
