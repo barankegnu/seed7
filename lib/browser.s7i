@@ -31,6 +31,8 @@ include "process.s7i";
 include "listener.s7i";
 include "cgi.s7i";
 include "cgidialog.s7i";
+include "httpserv.s7i";
+include "http_srv_resp.s7i";
 
 
 (**
@@ -41,98 +43,53 @@ const type: browserConnection is new struct
     var file: sock is socket.value;
     var process: program is process.value;
     var boolean: keepAlive is FALSE;
+    var httpServer: server is httpServer.value;
   end struct;
 
 
+(**
+ *  Read the request of a web browser and provide its parameters.
+ *  @return the path of the requested page, or "" if the browser
+ *          closed the connection.
+ *)
 const func string: processHttpRequest (inout browserConnection: browser, inout paramHashType: paramHash) is func
   result
     var string: filePath is "";
   local
-    var string: line is "";
-    var string: requestCommand is "";
-    var string: requestPath is "";
-    var string: hostName is "";
-    var integer: spacePos is 0;
-    var integer: questionMarkPos is 0;
-    var string: queryParams is "";
-    var string: postParams is "";
-    var string: buffer is "";
-    var string: contentType is "";
-    var string: contentLengthStri is "";
-    var integer: contentLength is 0;
+    var httpServerRequest: request is httpServerRequest.value;
   begin
     browser.keepAlive := FALSE;
-    line := getln(browser.sock);
-    # writeln(literal(line));
-    while line <> "" do
-      # writeln(line);
-      if startsWith(line, "GET") then
-        requestCommand := "GET";
-        requestPath := trim(line[4 ..]);
-        spacePos := pos(requestPath, ' ');
-        if spacePos <> 0 then
-          requestPath := requestPath[.. pred(spacePos)];
+    # getHttpRequest() of httpserv.s7i parses the request and keeps the
+    # connection state in browser.server. It reads the socket before it
+    # parses, so a second request that is already buffered is reported only
+    # when more data arrives - a web browser waits for the response anyway.
+    # shortcut: body size limits are those of httpserv.s7i, which buffers an
+    # announced body; upgrade there if a hard limit is needed.
+    block
+      request := getHttpRequest(browser.server, browser.sock);
+      while request.method = "" and hasNext(browser.sock) do
+        request := getHttpRequest(browser.server, browser.sock);
+      end while;
+    exception
+      catch FILE_ERROR:
+        # The browser has already closed the connection. Only the method is
+        # needed to report that, assigning the whole request would copy
+        # its strings and hash tables.
+        request.method := "";
+    end block;
+    if request.method = "GET" or request.method = "POST" then
+      browser.keepAlive :=
+          lower(request.properties["connection" default ""]) = "keep-alive";
+      filePath := request.path;
+      if request.method = "POST" then
+        if request.body <> "" then
+          paramHash := getCgiParameters(request.body);
+        else
+          paramHash := paramHashType.value;
         end if;
-      elsif startsWith(line, "POST") then
-        requestCommand := "POST";
-        requestPath := trim(line[5 ..]);
-        spacePos := pos(requestPath, ' ');
-        if spacePos <> 0 then
-          requestPath := requestPath[.. pred(spacePos)];
-        end if;
-      elsif startsWith(line, "Host") then
-        hostName := trim(line[succ(pos(line, ":")) ..]);
-      elsif startsWith(line, "Connection") then
-        browser.keepAlive := trim(line[succ(pos(line, ":")) ..]) = "keep-alive";
-      elsif startsWith(line, "Content-Length") then
-        contentLengthStri := trim(line[succ(pos(line, ":")) ..]);
-        block
-          contentLength := integer(contentLengthStri);
-        exception
-          catch RANGE_ERROR:
-            contentLength := -1;
-        end block;
-      end if;
-      line := getln(browser.sock);
-    end while;
-    if requestCommand = "GET" then
-      # writeln("GET" <& requestPath);
-      questionMarkPos := pos(requestPath, '?');
-      if questionMarkPos <> 0 then
-        queryParams := requestPath[succ(questionMarkPos) ..];
-        requestPath := requestPath[.. pred(questionMarkPos)];
-      end if;
-      # writeln(queryParams);
-      filePath := replace(requestPath, "\\", "/");
-      # writeln(literal(filePath));
-      paramHash := getCgiParameters(queryParams);
-    elsif requestCommand = "POST" then
-      # writeln("POST" <& requestPath);
-      questionMarkPos := pos(requestPath, '?');
-      if questionMarkPos <> 0 then
-        queryParams := requestPath[succ(questionMarkPos) ..];
-        requestPath := requestPath[.. pred(questionMarkPos)];
-      end if;
-      # writeln(queryParams);
-      if contentLengthStri <> "" then
-        while contentLength <> 0 do
-          buffer := gets(browser.sock, contentLength);
-          contentLength -:= length(buffer);
-          postParams &:= buffer;
-        end while;
       else
-        # writeln("no length");
-        buffer := gets(browser.sock, 10000000);
-        while buffer <> "" do
-          postParams &:= buffer;
-          buffer := gets(browser.sock, 10000000);
-        end while;
+        paramHash := request.queryParams;
       end if;
-      buffer := "";
-      # writeln(postParams);
-      filePath := replace(requestPath, "\\", "/");
-      # writeln(literal(filePath));
-      paramHash := getCgiParameters(postParams);
     else
       paramHash := paramHashType.value;
     end if;
@@ -191,12 +148,23 @@ const func browserConnection: openBrowser is func
 
 const proc: close (inout browserConnection: browser) is func
   begin
-    block
-      close(browser.sock);
-    exception
-      catch FILE_ERROR:
-        noop;  # Ignore error (the browser has already closed the socket).
-    end block;
+    if browser.sock in browser.server.sessions then
+      block
+        # closeHttpSession() closes the socket and removes the session.
+        closeHttpSession(browser.server, browser.sock);
+      exception
+        catch FILE_ERROR:
+          # Ignore error (the browser has already closed the socket).
+          excl(browser.server.sessions, browser.sock);
+      end block;
+    else
+      block
+        close(browser.sock);
+      exception
+        catch FILE_ERROR:
+          noop;  # Ignore error (the browser has already closed the socket).
+      end block;
+    end if;
   end func;
 
 
@@ -213,32 +181,6 @@ const proc: acceptNewSock (inout browserConnection: browser) is func
       end if;
     until hasNext;
     # writeln("accept");
-  end func;
-
-
-const proc: sendClientError (inout file: sock, in integer: statuscode,
-    in string: message, in string: explanation) is func
-  local
-    var string: response is "";
-    var string: htmlMessage is "";
-  begin
-    htmlMessage := "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n\
-                   \<html><head>\n\
-                   \<title>" <& statuscode <& " " <& message <& "</title>\n\
-                   \</head><body>\n\
-                   \<h1>" <& message <& "</h1>\n\
-                   \<p>" <& explanation <& "</p>\n\
-                   \<hr>\n\
-                   \<address>Comanche</address>\n\
-                   \</body></html>\n";
-    response := "HTTP/1.1 " <& statuscode <& " " <& message <& "\r\n\
-                \Server: Comanche\r\n\
-                \Transfer-Encoding: identity\r\n\
-                \Content-Length: " <& length(htmlMessage) <& "\r\n\
-                \Content-Type: text/html\r\n\
-                \\r\n";
-    response &:= htmlMessage;
-    write(sock, response);
   end func;
 
 
