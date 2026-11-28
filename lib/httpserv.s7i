@@ -149,8 +149,12 @@ const func httpServerRequest: getHttpRequest (inout httpServerConnection: conn) 
               conn.contentToRead := integer(conn.request.properties["content-length"]);
             exception
               catch RANGE_ERROR:
-                noop;
+                conn.contentToRead := 0;
             end block;
+            if conn.contentToRead < 0 then
+              # A negative body length must not be used for indexing.
+              conn.contentToRead := 0;
+            end if;
           end if;
           conn.readingHeader := FALSE;
           lfPos := 0;
@@ -169,7 +173,9 @@ const func httpServerRequest: getHttpRequest (inout httpServerConnection: conn) 
             catch RANGE_ERROR:
               noop;
           end block;
-          conn.request.queryParams := getCgiParameters(conn.request.queryStri);
+          if conn.request.queryStri <> "" then
+            conn.request.queryParams := getCgiParameters(conn.request.queryStri);
+          end if;
         else
           colonPos := pos(line, ':');
           if colonPos <> 0 then
