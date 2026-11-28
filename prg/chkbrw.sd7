@@ -1,0 +1,285 @@
+
+(********************************************************************)
+(*                                                                  *)
+(*  chkbrw.sd7    Checks the browser connection of browser.s7i      *)
+(*  Copyright (C) 2026  barankegnu                                  *)
+(*                                                                  *)
+(*  This file is part of the Seed7 Runtime Library.                 *)
+(*                                                                  *)
+(*  The Seed7 Runtime Library is free software; you can             *)
+(*  redistribute it and/or modify it under the terms of the GNU     *)
+(*  Lesser General Public License as published by the Free Software *)
+(*  Foundation; either version 2.1 of the License, or (at your      *)
+(*  option) any later version.                                      *)
+(*                                                                  *)
+(*  The Seed7 Runtime Library is distributed in the hope that it    *)
+(*  will be useful, but WITHOUT ANY WARRANTY; without even the      *)
+(*  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR *)
+(*  PURPOSE.  See the GNU Lesser General Public License for more    *)
+(*  details.                                                        *)
+(*                                                                  *)
+(*  You should have received a copy of the GNU Lesser General       *)
+(*  Public License along with this program; if not, write to the    *)
+(*  Free Software Foundation, Inc., 51 Franklin Street,             *)
+(*  Fifth Floor, Boston, MA  02110-1301, USA.                       *)
+(*                                                                  *)
+(********************************************************************)
+
+
+$ include "seed7_05.s7i";
+  include "browser.s7i";
+
+
+# The port range used to reach the libraries. A free port is searched
+# at run time, so that a parallel check or a foreign program on one of
+# these ports does not make this check fail.
+const integer: FIRST_PORT is 12931;
+const integer: LAST_PORT is 13031;
+
+
+(**
+ *  Open a listener at the first port of the range above that can be
+ *  bound.
+ *  @return the port of the listener, or 0 if no port could be bound.
+ *)
+const func integer: openFreeListener (inout listener: aListener) is func
+  result
+    var integer: portNumber is 0;
+  local
+    var integer: candidate is FIRST_PORT;
+  begin
+    while portNumber = 0 and candidate <= LAST_PORT do
+      block
+        aListener := openInetListener(candidate);
+        listen(aListener, 10);
+        portNumber := candidate;
+      exception
+        catch FILE_ERROR:
+          aListener := listener.value;
+      end block;
+      incr(candidate);
+    end while;
+  end func;
+
+
+(**
+ *  Send ''request'' and ''body'' to processHttpRequest() and compare
+ *  the path and the parameters it provides.
+ *)
+const proc: checkRequest (in string: description, in string: request,
+    in string: body, in boolean: hangUp, in string: expectedPath,
+    in integer: expectedCount, in string: expectedName,
+    in string: expectedValue) is func
+  local
+    var browserConnection: browser is browserConnection.value;
+    var paramHashType: paramHash is paramHashType.value;
+    var file: client is socket.value;
+    var integer: portNumber is 0;
+    var string: filePath is "";
+    var string: value is "";
+    var string: escaped is "";
+    var boolean: okay is FALSE;
+  begin
+    portNumber := openFreeListener(browser.inetListener);
+    if portNumber <> 0 then
+      client := openInetSocket(portNumber);
+      browser.sock := accept(browser.inetListener);
+      write(client, request);
+      write(client, body);
+      if hangUp then
+        # The web browser closed the connection.
+        close(client);
+      end if;
+      block
+        block
+          filePath := processHttpRequest(browser, paramHash);
+          okay := filePath = expectedPath and
+              length(paramHash) = expectedCount;
+          if okay and expectedName <> "" then
+            value := paramHash[expectedName default ""];
+            okay := value = expectedValue;
+          end if;
+        exception
+          catch RANGE_ERROR:
+            escaped := "RANGE_ERROR escaped the parser";
+        end block;
+      exception
+        catch INDEX_ERROR:
+          escaped := "INDEX_ERROR escaped the parser";
+      end block;
+      if okay and escaped = "" then
+        writeln(description <& " works correctly.");
+      else
+        writeln(description <& " does not work correctly: " <& escaped <&
+            " path=" <& literal(filePath) <& " parameters=" <&
+            length(paramHash) <& " value=" <& literal(value));
+      end if;
+      block
+        close(client);
+      exception
+        catch FILE_ERROR:
+          noop;
+      end block;
+      close(browser);
+      close(browser.inetListener);
+    else
+      writeln(description <& " could not open a listener.");
+    end if;
+  end func;
+
+
+const proc: checkRequests is func
+  begin
+    checkRequest("A GET request with query parameters",
+        "GET /x?a=1&b=two HTTP/1.1\r\nHost: localhost\r\n" &
+        "Connection: keep-alive\r\n\r\n", "", FALSE, "/x", 2, "b", "two");
+    checkRequest("A POST request with a complete body",
+        "POST /y HTTP/1.1\r\nHost: localhost\r\n" &
+        "Content-Length: 13\r\n\r\n", "name=seed7-05", FALSE,
+        "/y", 1, "name", "seed7-05");
+    checkRequest("A Content-Length which is not a number",
+        "POST /y HTTP/1.1\r\nHost: localhost\r\n" &
+        "Content-Length: 1z\r\n\r\n", "", FALSE, "/y", 0, "", "");
+    checkRequest("A negative Content-Length",
+        "POST /y HTTP/1.1\r\nHost: localhost\r\n" &
+        "Content-Length: -5\r\n\r\n", "", FALSE, "/y", 0, "", "");
+    checkRequest("A Content-Length larger than any form body",
+        "POST /y HTTP/1.1\r\nHost: localhost\r\n" &
+        "Content-Length: 2000000000\r\n\r\n", "", TRUE, "", 0, "", "");
+    checkRequest("A POST request without Content-Length",
+        "POST /z?dropped=1 HTTP/1.1\r\nHost: localhost\r\n" &
+        "Connection: keep-alive\r\n\r\n", "a=1&b=2", TRUE, "/z", 0, "", "");
+    checkRequest("A request method which is not supported",
+        "HEAD / HTTP/1.1\r\nHost: localhost\r\n\r\n", "", FALSE,
+        "", 0, "", "");
+    checkRequest("A POST request with a truncated body",
+        "POST /y HTTP/1.1\r\nHost: localhost\r\n" &
+        "Content-Length: 100\r\n\r\n", "abc", TRUE, "", 0, "", "");
+    checkRequest("A percent-encoded request path",
+        "GET /a%20b/c%2Fd?k=%41 HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        "", FALSE, "/a b/c/d", 1, "k", "A");
+  end func;
+
+
+(**
+ *  Read two requests which arrive on the same connection.
+ *)
+const proc: checkKeepAlive is func
+  local
+    var browserConnection: browser is browserConnection.value;
+    var paramHashType: paramHash is paramHashType.value;
+    var paramHashType: firstParams is paramHashType.value;
+    var file: client is socket.value;
+    var integer: portNumber is 0;
+    var string: firstPath is "";
+    var string: secondPath is "";
+    var boolean: okay is FALSE;
+  begin
+    portNumber := openFreeListener(browser.inetListener);
+    if portNumber <> 0 then
+      client := openInetSocket(portNumber);
+      browser.sock := accept(browser.inetListener);
+      # A web browser waits for the response before it sends the next
+      # request, so the second request is written after the first was read.
+      write(client, "POST /one HTTP/1.1\r\nContent-Length: 5\r\n\r\nfirst");
+      firstPath := processHttpRequest(browser, paramHash);
+      firstParams := paramHash;
+      write(client, "GET /two?q=2 HTTP/1.1\r\nConnection: keep-alive\r\n\r\n");
+      secondPath := processHttpRequest(browser, paramHash);
+      okay := firstPath = "/one" and
+          firstParams = getCgiParameters("first") and
+          secondPath = "/two" and paramHash = getCgiParameters("q=2");
+      if okay then
+        writeln("Two requests on one connection work correctly.");
+      else
+        writeln("Two requests on one connection do not work correctly: " <&
+            literal(firstPath) <& " " <& literal(secondPath));
+      end if;
+      block
+        close(client);
+      exception
+        catch FILE_ERROR:
+          noop;
+      end block;
+      close(browser);
+      close(browser.inetListener);
+    else
+      writeln("Two requests on one connection could not open a listener.");
+    end if;
+  end func;
+
+
+(**
+ *  Let display() serve a form page, answer a request for another page
+ *  with 404 and leave the loop when the form is submitted.
+ *)
+const proc: checkDisplay is func
+  local
+    var browserConnection: browser is browserConnection.value;
+    var paramHashType: paramHash is paramHashType.value;
+    var file: first is socket.value;
+    var file: wrong is socket.value;
+    var file: form is socket.value;
+    var integer: portNumber is 0;
+    var string: body is "name1=posted&name2=Go";
+    var string: request is "";
+    var string: answer is "";
+    var string: error is "";
+    var string: filePath is "";
+    var textField: nameField is textField("initial", 20);
+    var submitButton: goButton is submitButton(label("Go"));
+    var webPage: page is webForm("Check", dialogColumn(nameField & goButton));
+    var boolean: okay is FALSE;
+  begin
+    nameField.name := "name1";
+    goButton.name := "name2";
+    portNumber := openFreeListener(browser.inetListener);
+    if portNumber <> 0 then
+      first := openInetSocket(portNumber);
+      browser.sock := accept(browser.inetListener);
+      write(first, "GET / HTTP/1.1\r\n\r\n");
+      filePath := processHttpRequest(browser, paramHash);
+      # display() closes that connection and waits for one which has a
+      # request ready, since hasNext() of a socket blocks until data arrives.
+      wrong := openInetSocket(portNumber);
+      request := "POST /missing HTTP/1.1\r\nContent-Length: " <&
+          length(body) <& "\r\n\r\n" <& body;
+      write(wrong, request);
+      form := openInetSocket(portNumber);
+      request := "POST / HTTP/1.1\r\nContent-Length: " <&
+          length(body) <& "\r\n\r\n" <& body;
+      write(form, request);
+      display(browser, page);
+      answer := gets(first, 100);
+      error := gets(wrong, 24);
+      okay := filePath = "/" and
+          startsWith(answer, "HTTP/1.1 200 OK") and
+          startsWith(error, "HTTP/1.1 404 Not Found");
+      if okay then
+        writeln("The display() of a form page works correctly.");
+      else
+        writeln("The display() of a form page does not work correctly: " <&
+            literal(filePath) <& " " <& literal(answer) <& " " <& literal(error));
+      end if;
+      block
+        close(first);
+        close(wrong);
+        close(form);
+      exception
+        catch FILE_ERROR:
+          noop;
+      end block;
+      close(browser);
+      close(browser.inetListener);
+    else
+      writeln("The display() of a form page could not open a listener.");
+    end if;
+  end func;
+
+
+const proc: main is func
+  begin
+    checkRequests;
+    checkKeepAlive;
+    checkDisplay;
+  end func;

@@ -17,6 +17,7 @@ chkbig.sd7   Checks bigInteger literals and operations
 chkbin.sd7   Checks bin32 and bin64 operations.
 chkbitdata.sd7 Checks functions from the bitdata.s7i library.
 chkbool.sd7  Checks boolean operations
+chkbrw.sd7   Checks the browser connection of browser.s7i
 chkbst.sd7   Checks byte string operations
 chkchr.sd7   Checks character properties
 chkcmd.sd7   Check functions that manipulate files.

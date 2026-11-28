@@ -479,6 +479,18 @@ const string: chkhsh_output is "\n\
   \The assignment of a hash variable to itself works correctly.\n\
   \Hash literals work correctly.\n";
 
+const string: chkbrw_output is "A GET request with query parameters works correctly.\n\
+  \A POST request with a complete body works correctly.\n\
+  \A Content-Length which is not a number works correctly.\n\
+  \A negative Content-Length works correctly.\n\
+  \A Content-Length larger than any form body works correctly.\n\
+  \A POST request without Content-Length works correctly.\n\
+  \A request method which is not supported works correctly.\n\
+  \A POST request with a truncated body works correctly.\n\
+  \A percent-encoded request path works correctly.\n\
+  \Two requests on one connection work correctly.\n\
+  \The display() of a form page works correctly.\n";
+
 const string: chkfil_output is "\n\
   \Open a file does work correctly.\n\
   \File I/O does work correctly.\n\
@@ -839,6 +851,7 @@ const proc: main is func
     check("chkbitdata", chkbitdata_output);
     check("chkset",  chkset_output);
     check("chkhsh",  chkhsh_output);
+    check("chkbrw",  chkbrw_output);
     check("chkfil",  chkfil_output);
     check("chkerr",  chkerr_output);
     check("chkexc",  chkexc_output);
